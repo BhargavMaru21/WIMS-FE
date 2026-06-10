@@ -23,6 +23,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { InputComponent } from '../../../shared/components/input/input';
 import { ConfirmDialog } from '../../../shared/components/confirm-dialog/confirm-dialog';
+import { ProductCategoryFormDialog } from './components/product-category-form-dialog/product-category-form-dialog';
 
 @Component({
   selector: 'app-product-category',
@@ -146,12 +147,25 @@ export class ProductCategory {
     this.loadData();
   }
 
-  openCreateDialog() {
-
+  openCreateDialog(): void {
+    const ref = this.dialogSvc.open(
+      { title: 'Create Product Category', submitLabel: "Create" },
+      ProductCategoryFormDialog,
+    );
+    ref.afterClosed().subscribe(result => {
+      if (result) this.loadData();
+    });
   }
 
-  openEditDialog(productCategory: ProductCategoryResponse) {
-
+  openEditDialog(category: ProductCategoryResponse): void {
+    const ref = this.dialogSvc.open(
+      { title: 'Edit Product Category', submitLabel: "Update" },
+      ProductCategoryFormDialog,
+      { category },
+    );
+    ref.afterClosed().subscribe(result => {
+      if (result) this.loadData();
+    });
   }
 
   openDeleteDialog(productCategory: ProductCategoryResponse) {
@@ -181,32 +195,32 @@ export class ProductCategory {
   }
 
 
-toggleStatus(productCategory: ProductCategoryResponse) {
-  const newStatus = productCategory.status === 'Active' ? 'Inactive' : 'Active';
+  toggleStatus(productCategory: ProductCategoryResponse) {
+    const newStatus = productCategory.status === 'Active' ? 'Inactive' : 'Active';
 
-  this.dialog.open(ConfirmDialog, {
-    width: '420px',
-    data: {
-      title: `${newStatus} ProductCategory`,
-      message: `Are you sure you want to ${newStatus} ProductCategory?`,
-      confirmText: newStatus
-    }
-  })
-    .afterClosed()
-    .subscribe((confirm) => {
-      if (!confirm) return;
-
-      this.service.updateProductCategoryStatus(productCategory.id, { status: newStatus }).subscribe({
-        next: res => {
-          if (res.isSuccess) {
-            this.toast.success(`ProductCategory ${newStatus.toLowerCase()} successfully.`);
-            this.loadData();
-          } else {
-            this.toast.error(res.message ?? 'Failed to update status.');
-          }
-        }
-      });
+    this.dialog.open(ConfirmDialog, {
+      width: '420px',
+      data: {
+        title: `${newStatus} ProductCategory`,
+        message: `Are you sure you want to ${newStatus} ProductCategory?`,
+        confirmText: newStatus
+      }
     })
-}
+      .afterClosed()
+      .subscribe((confirm) => {
+        if (!confirm) return;
+
+        this.service.updateProductCategoryStatus(productCategory.id, { status: newStatus }).subscribe({
+          next: res => {
+            if (res.isSuccess) {
+              this.toast.success(`ProductCategory ${newStatus.toLowerCase()} successfully.`);
+              this.loadData();
+            } else {
+              this.toast.error(res.message ?? 'Failed to update status.');
+            }
+          }
+        });
+      })
+  }
 
 }
