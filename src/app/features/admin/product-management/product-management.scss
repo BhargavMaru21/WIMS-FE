@@ -1,0 +1,53 @@
+.search-field {
+    flex: 1 1 260px;
+    min-width: 200px;
+    max-width: 300px;
+  }
+  
+  .filter-field {
+    flex: 0 0 160px;
+  }
+  
+  .filter-field-wide {
+    flex: 0 0 220px;
+  }
+  
+  .no-data {
+    padding: 32px;
+    color: #49454f;
+  }
+  
+  .sku-badge {
+    font-family: monospace;
+    font-size: 0.8rem;
+    background: #f3f3f3;
+    padding: 2px 8px;
+    border-radius: 4px;
+    color: #333;
+  }
+
+  .sku-badge.sku-link {
+    cursor: pointer;
+    &:hover {
+      background: #e2e8f0;
+      text-decoration: underline;
+    }
+  }
+  
+  .import-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 12px;
+    height: 36px;
+    cursor: pointer;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 4px;
+    font-size: 14px;
+    background: transparent;
+    transition: background 0.2s;
+  
+    &:hover {
+      background: rgba(0, 0, 0, 0.04);
+    }
+  }

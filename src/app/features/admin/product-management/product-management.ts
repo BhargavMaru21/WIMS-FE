@@ -12,19 +12,24 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
-import { debounceTime, distinctUntilChanged, finalize, switchMap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, finalize } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { InputComponent } from '../../../shared/components/input/input';
 import { DialogService } from '../../../core/services/dialog-service';
 import { ToastService } from '../../../core/services/toast-service';
-import { WarehouseManagementService } from '../warehouse-management/services/warehouse-service';
-import { BinResponse, WarehouseDropdown, ZoneDropdown, ZoneResponse } from '../warehouse-management/models/warehouse-models';
 import { ConfirmDialog } from '../../../shared/components/confirm-dialog/confirm-dialog';
-import { BinFormDialog } from './components/bin-form-dialog/bin-form-dialog';
+import { ProductService } from './services/product-service';
+import { ProductCategoryService } from '../product-category/services/product-category-service';
+import { ProductResponse, UomResponse } from './models/product-models';
+import { ProductFormDialog } from './components/product-form-dialog/product-form-dialog';
+import { UomDialog } from './components/uom-dialog/uom-dialog';
+import { ProductDetailDialog } from './components/product-detail-dialog/product-detail-dialog';
+import { ProductCategoryDropdownResponse } from '../product-category/models/product-category-models';
 
 @Component({
-  selector: 'app-bin-management',
+  selector: 'app-product-management',
   standalone: true,
   imports: [
     CommonModule,
@@ -40,41 +45,41 @@ import { BinFormDialog } from './components/bin-form-dialog/bin-form-dialog';
     MatMenuModule,
     MatProgressSpinnerModule,
     MatSlideToggleModule,
+    MatTooltipModule,
     InputComponent,
   ],
-  templateUrl: './bin-management.html',
-  styleUrl: './bin-management.scss',
+  templateUrl: './product-management.html',
+  styleUrl: './product-management.scss',
 })
-export class BinManagement implements OnInit {
-  private readonly service = inject(WarehouseManagementService);
+export class ProductManagement implements OnInit {
+  private readonly service = inject(ProductService);
+  private readonly categorySvc = inject(ProductCategoryService);
   private readonly dialogSvc = inject(DialogService);
   private readonly dialog = inject(MatDialog);
   private readonly toast = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
 
-  displayedColumns = ['code', 'name', 'zoneName', 'warehouseName', 'maxCapacity', 'status', 'actions'];
-  dataSource = new MatTableDataSource<BinResponse>();
+  displayedColumns = ['sku', 'name', 'categoryName', 'unitOfMeasure', 'unitPrice', 'reorderLevel', 'status', 'actions'];
+  dataSource = new MatTableDataSource<ProductResponse>();
 
   loading = signal(false);
+  importing = signal(false);
+  exporting = signal(false);
   totalCount = signal(0);
 
   search = new FormControl('', [Validators.maxLength(100)]);
   statusFilter = signal('');
+  categoryFilter = signal('');
+  selectedCategoryIds = signal<number[]>([]);
 
-  warehouseFilter = signal('');
-  zoneFilter = signal('');
-
-  selectedWarehouseIds = signal<number[]>([]);
-  selectedZoneIds = signal<number[]>([]);
-
-  pageSize = signal(5);
+  pageSize = signal(10);
   pageIndex = signal(0);
   sortBy = signal('createdAt');
   sortDirection = signal('desc');
 
   statusOptions = ['Active', 'Inactive'];
-  allWarehouses = signal<WarehouseDropdown[]>([]);
-  allZones = signal<ZoneDropdown[]>([]);
+  allCategories = signal<ProductCategoryDropdownResponse[]>([]);
+  allUoms = signal<UomResponse[]>([]);
 
   ngOnInit(): void {
     this.search.valueChanges.pipe(
@@ -82,12 +87,12 @@ export class BinManagement implements OnInit {
       distinctUntilChanged(),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(() => {
-      this.pageIndex.set(0)
-      this.loadData()
+      this.pageIndex.set(0);
+      this.loadData();
     });
 
-    this.loadWarehouses();
-    this.loadZones();
+    this.loadCategories();
+    this.loadUoms();
     this.loadData();
   }
 
@@ -102,9 +107,9 @@ export class BinManagement implements OnInit {
 
     const filters: Record<string, string> = {};
     if (this.statusFilter()) filters['Status'] = this.statusFilter();
-    if (this.zoneFilter()) filters['ZoneId'] = this.zoneFilter();
+    if (this.categoryFilter()) filters['CategoryId'] = this.categoryFilter();
 
-    this.service.getBins(
+    this.service.getProducts(
       {
         pageNumber: this.pageIndex() + 1,
         pageSize: this.pageSize(),
@@ -123,25 +128,21 @@ export class BinManagement implements OnInit {
     });
   }
 
-  loadWarehouses(): void {
-    this.service.getWarehouses(
-      { pageNumber: 1, pageSize: 200, sortBy: 'name', sortDirection: 'asc' }
-    ).subscribe({
+  loadCategories(): void {
+    this.categorySvc.getProductCategoryDropdown().subscribe({
       next: res => {
         if (res.isSuccess && res.data) {
-          this.allWarehouses.set(
-            res.data.items.map(w => ({ id: w.id, name: w.name }))
-          );
+          this.allCategories.set(res.data);
         }
       }
     });
   }
 
-  loadZones(): void {
-    this.service.getZonesDropdown().subscribe({
+  loadUoms(): void {
+    this.service.getAllUoms().subscribe({
       next: res => {
         if (res.isSuccess && res.data) {
-          this.allZones.set(res.data)
+          this.allUoms.set(res.data);
         }
       }
     });
@@ -153,53 +154,17 @@ export class BinManagement implements OnInit {
     this.loadData();
   }
 
-  onWarehouseFilter(selectedIds: number[]): void {
-    let zoneIdArray = this.allZoneOfSelectedWarehouse(selectedIds)
-
-    this.selectedWarehouseIds.set(selectedIds);
-    this.warehouseFilter.set(selectedIds.length > 0 ? selectedIds.join(',') : '');
-
-    this.selectedZoneIds.set(zoneIdArray);
-    if (zoneIdArray.length > 0) this.zoneFilter.set(this.selectedZoneIds().join(','))
-    else if (zoneIdArray.length == 0 && this.selectedWarehouseIds().length > 0) this.zoneFilter.set('-1')
-    else this.zoneFilter.set('')
+  onCategoryFilter(selectedIds: number[]): void {
+    this.selectedCategoryIds.set(selectedIds);
+    this.categoryFilter.set(selectedIds.length > 0 ? selectedIds.join(',') : '');
     this.pageIndex.set(0);
     this.loadData();
-  }
-
-  private allZoneOfSelectedWarehouse(warehouseIds: number[]): number[] {
-    if (warehouseIds.length == 0) return [];
-    var filterZonesArray = warehouseIds.map((id) => this.allZones().filter((zone) => zone.warehouseId == id));
-    var zoneIds = filterZonesArray.flat().map(zone => zone.id)
-
-    return zoneIds;
-  }
-
-  onZoneFilter(selectedIds: number[]): void {
-    this.selectedZoneIds.set(selectedIds);
-    if (selectedIds.length > 0) {
-      this.zoneFilter.set(selectedIds.join(','))
-    } else {
-      this.zoneFilter.set('')
-      this.selectedWarehouseIds.set([])
-      this.warehouseFilter.set('')
-    }
-    this.pageIndex.set(0);
-    this.loadData();
-  }
-
-  isZoneDisabled(zone: ZoneDropdown): boolean {
-    const selected = this.selectedWarehouseIds();
-    if (selected.length === 0) return false;
-    return !selected.includes(zone.warehouseId);
   }
 
   clearFilters(): void {
     this.statusFilter.set('');
-    this.warehouseFilter.set('');
-    this.zoneFilter.set('');
-    this.selectedWarehouseIds.set([]);
-    this.selectedZoneIds.set([]);
+    this.categoryFilter.set('');
+    this.selectedCategoryIds.set([]);
     this.pageIndex.set(0);
     if (this.search.value !== '') {
       this.search.setValue('');
@@ -223,41 +188,55 @@ export class BinManagement implements OnInit {
 
   openCreateDialog(): void {
     const ref = this.dialogSvc.open(
-      { title: 'Create Bin', submitLabel: "Create" },
-      BinFormDialog,
-      { warehouses: this.allWarehouses(), zones: this.allZones() },
+      { title: 'Create Product' },
+      ProductFormDialog,
+      { categories: this.allCategories(), uoms: this.allUoms() },
     );
     ref.afterClosed().subscribe(result => {
       if (result) this.loadData();
     });
   }
 
-  openEditDialog(bin: BinResponse): void {
+  openEditDialog(product: ProductResponse): void {
     const ref = this.dialogSvc.open(
-      { title: 'Edit Bin', submitLabel: "Update" },
-      BinFormDialog,
-      { bin, warehouses: this.allWarehouses(), zones: this.allZones() },
+      { title: 'Edit Product' },
+      ProductFormDialog,
+      { product, categories: this.allCategories(), uoms: this.allUoms() },
     );
     ref.afterClosed().subscribe(result => {
       if (result) this.loadData();
     });
   }
 
-  toggleStatus(bin: BinResponse): void {
-    const newStatus = bin.status === 'Active' ? 'Inactive' : 'Active';
+  openUomDialog(): void {
+    const ref = this.dialogSvc.open(
+      { title: 'Units of Measure', hideFooter: true },
+      UomDialog,
+      {},
+      '560px',
+    );
+    ref.afterClosed().subscribe(result => {
+      this.loadUoms();
+    });
+  }
+
+  toggleStatus(product: ProductResponse): void {
+    const newStatus = product.status === 'Active' ? 'Inactive' : 'Active';
+
     this.dialog.open(ConfirmDialog, {
       width: '420px',
       data: {
-        title: `${newStatus} Bin`,
-        message: `Are you sure you want to ${newStatus.toLowerCase()} this bin?`,
+        title: `${newStatus} Product`,
+        message: `Are you sure you want to ${newStatus.toLowerCase()} "${product.name}"?`,
         confirmText: newStatus,
       }
     }).afterClosed().subscribe(confirm => {
       if (!confirm) return;
-      this.service.updateBinStatus(bin.id, { status: newStatus }).subscribe({
+
+      this.service.updateProductStatus(product.id, { status: newStatus }).subscribe({
         next: res => {
           if (res.isSuccess) {
-            this.toast.success(`Bin ${newStatus.toLowerCase()} successfully.`);
+            this.toast.success(`Product ${newStatus.toLowerCase()} successfully.`);
             this.loadData();
           } else {
             this.toast.error(res.message ?? 'Failed to update status.');
@@ -267,28 +246,88 @@ export class BinManagement implements OnInit {
     });
   }
 
-  openDeleteDialog(bin: BinResponse): void {
+  openDeleteDialog(product: ProductResponse): void {
     this.dialog.open(ConfirmDialog, {
       width: '420px',
       data: {
-        title: 'Delete Bin',
-        message: 'Are you sure you want to delete this bin?',
+        title: 'Delete Product',
+        message: `Are you sure you want to delete "${product.name}".`,
         confirmText: 'Delete',
       }
     }).afterClosed().subscribe(confirm => {
       if (!confirm) return;
-      this.service.deleteBin(bin.id).subscribe({
+
+      this.service.deleteProduct(product.id).subscribe({
         next: res => {
           if (res.isSuccess) {
-            this.toast.success(res.data ?? 'Bin deleted successfully.');
+            this.toast.success(res.data ?? 'Product deleted successfully.');
             this.loadData();
           } else {
-            this.toast.error(res.message ?? 'Failed to delete bin.');
+            this.toast.error(res.message ?? 'Failed to delete product.');
           }
         }
       });
     });
   }
+
+  onImport(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.xlsx')) {
+      this.toast.error('Please upload a valid .xlsx file.');
+      input.value = '';
+      return;
+    }
+
+    this.importing.set(true);
+    this.service.importProducts(file)
+      .pipe(finalize(() => {
+        this.importing.set(false);
+        input.value = '';
+      }))
+      .subscribe({
+        next: res => {
+          if (res.isSuccess) {
+            this.toast.success(res.message ?? 'Products imported successfully.');
+            this.loadData();
+          } else {
+            this.toast.error(res.message ?? 'Import failed.');
+          }
+        }
+      });
+  }
+
+  onExport(): void {
+    this.exporting.set(true);
+    this.service.exportProducts()
+      .pipe(finalize(() => this.exporting.set(false)))
+      .subscribe({
+        next: blob => {
+          console.log(blob);
+
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Products_Export.xlsx`;
+          a.click();
+          a.remove()
+          URL.revokeObjectURL(url);
+          this.toast.success('Products exported successfully.');
+        },
+        error: () => {
+          this.toast.error('Export failed. Please try again.');
+        }
+      });
+  }
+
+  openDetailDialog(product: ProductResponse): void {
+    this.dialogSvc.open(
+      { title: 'Product Details', hideFooter: true },
+      ProductDetailDialog,
+      { productId: product.id },
+      '540px',
+    );
+  }
 }
-
-

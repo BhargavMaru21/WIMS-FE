@@ -267,7 +267,7 @@ export class UserManagement implements OnInit {
         this.service.deleteUser(user.id).subscribe({
           next: res => {
             if (res.isSuccess) {
-              this.toast.success(`User Deleted successfully.`);
+              this.toast.success(res.data ?? `User Deleted successfully.`);
               this.loadData();
             } else {
               this.toast.error(res.message ?? 'Failed to Delete User.');

@@ -22,8 +22,8 @@ export class WarehouseFormDialogComponent implements OnInit {
   readonly dialogRef = inject(MatDialogRef<WarehouseFormDialogComponent>);
   readonly data: { config: DialogConfig; warehouse?: WarehouseResponse } = inject(MAT_DIALOG_DATA);
 
-  readonly loading = signal(false);
-  readonly isEdit = signal(false);
+  loading = signal(false);
+  isEdit = signal(false);
 
   form = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100), Validators.pattern(/^(?=.*[A-Za-z])[A-Za-z0-9\s\-_]+$/)]],

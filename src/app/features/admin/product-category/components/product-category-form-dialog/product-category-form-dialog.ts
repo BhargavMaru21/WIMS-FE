@@ -22,8 +22,8 @@ export class ProductCategoryFormDialog implements OnInit {
   readonly dialogRef = inject(MatDialogRef<ProductCategoryFormDialog>);
   readonly data: { config: DialogConfig; category?: ProductCategoryResponse } = inject(MAT_DIALOG_DATA);
 
-  readonly loading = signal(false);
-  readonly isEdit = signal(false);
+  loading = signal(false);
+  isEdit = signal(false);
 
   form = this.fb.group({
     name: ['', [

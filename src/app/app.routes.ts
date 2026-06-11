@@ -11,7 +11,7 @@ export const routes: Routes = [
 
   {
     path: 'success',
-    component : Success
+    component: Success
   },
 
   {
@@ -20,7 +20,7 @@ export const routes: Routes = [
     children: [
       {
         path: 'login',
-        loadComponent: () => 
+        loadComponent: () =>
           import('./features/auth/login/login.js').then((m) => m.LoginComponent),
       },
       {
@@ -91,6 +91,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'products',
+        loadComponent: () =>
+          import('./features/admin/product-management/product-management.js').then(
+            (m) => m.ProductManagement,
+          ),
+      },
+      {
         path: 'profile',
         loadComponent: () =>
           import('./features/profile/profile.js').then((m) => m.ProfileComponent),
@@ -114,7 +121,23 @@ export const routes: Routes = [
         (m) => m.ManagerLayoutComponent,
       ),
     children: [
-     
+      {
+        path: 'purchase-order',
+        loadComponent: () =>
+          import('./features/manager/purchase-order/purchase-order.js').then(
+            (m) => m.PurchaseOrder
+          )
+      },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./features/profile/profile.js').then((m) => m.ProfileComponent),
+      },
+      {
+        path: '',
+        redirectTo: 'purchase-order',
+        pathMatch: 'full',
+      },
     ],
   },
 
@@ -128,7 +151,7 @@ export const routes: Routes = [
         (m) => m.StockKeeperLayoutComponent,
       ),
     children: [
-     
+
     ],
   },
 

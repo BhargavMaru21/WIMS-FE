@@ -33,8 +33,8 @@ export class ProductCategoryService {
         return this.http.get<ApiResponse<PagedResult<ProductCategoryResponse>>>(`${this.base}/productCategory`, { params: this.buildParams(qp, filters) });
     }
 
-    getProductCategoryDropdown(): Observable<ApiResponse<ProductCategoryDropdownResponse>>{
-        return this.http.get<ApiResponse<ProductCategoryDropdownResponse>>(`${this.base}/productCategory/active`)
+    getProductCategoryDropdown(): Observable<ApiResponse<ProductCategoryDropdownResponse[]>>{
+        return this.http.get<ApiResponse<ProductCategoryDropdownResponse[]>>(`${this.base}/productCategory/active`)
     }
 
     createProductCategory(payload : ProductCategoryCreateRequest): Observable<ApiResponse<ProductCategoryResponse>>{

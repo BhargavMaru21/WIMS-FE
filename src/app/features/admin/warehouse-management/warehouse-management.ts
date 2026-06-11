@@ -207,7 +207,7 @@ export class WarehouseManagement implements OnInit {
         this.service.deleteWarehouse(warehouse.id).subscribe({
           next: res => {
             if (res.isSuccess) {
-              this.toast.success("Warehouse and related Zones & Bins Deleted successfully.");
+              this.toast.success(res.data ?? "Warehouse and related Zones & Bins Deleted successfully.");
               this.loadData();
             } else {
               this.toast.error(res.message ?? 'Failed to Delete Warehouse.');
