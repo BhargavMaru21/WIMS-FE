@@ -1,20 +1,34 @@
 .search-field {
-    flex: 1 1 260px;
+    // flex: 1 1 260px;
     min-width: 200px;
     max-width: 300px;
   }
   
-  .filter-field {
-    flex: 0 0 160px;
-  }
+  // .filter-field {
+  //   flex: 0 0 160px;
+  // }
   
-  .filter-field-wide {
-    flex: 0 0 220px;
-  }
+  // .filter-field-wide {
+  //   flex: 0 0 220px;
+  // }
   
   .no-data {
     padding: 32px;
     color: #49454f;
+  }
+
+  .download-btn{
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 12px;
+    height: 36px;
+    cursor: pointer;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 4px;
+    font-size: 14px;
+    background: transparent;
+    transition: background 0.2s;
   }
   
   .sku-badge {

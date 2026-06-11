@@ -1,167 +1,158 @@
 <div class="d-flex flex-column gap-4">
 
-    <!-- header -->
-    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-      <h1 class="fs-4 m-0 fw-semibold">Products</h1>
-      <div class="d-flex align-items-center gap-2 flex-wrap">
-  
-        <button mat-stroked-button (click)="openUomDialog()">
-          <mat-icon>straighten</mat-icon> Units
-        </button>
-  
-        <label mat-stroked-button class="import-btn" [class.loading-btn]="importing()">
-          @if (importing()) {
-            <mat-spinner diameter="18" />
-          } @else {
-            <mat-icon>upload</mat-icon>
-          }
-          Import Products
-          <input type="file" accept=".xlsx" (change)="onImport($event)" class="d-none" />
-        </label>
-  
-        <button mat-stroked-button (click)="onExport()" [disabled]="exporting()">
-          @if (exporting()) {
-            <mat-spinner diameter="18" />
-          } @else {
-            <mat-icon>download</mat-icon>
-          }
-          Export Products
-        </button>
-  
-        <button mat-flat-button color="primary" (click)="openCreateDialog()">
-          <mat-icon>add</mat-icon> Create Product
-        </button>
-  
-      </div>
+  <!-- header -->
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+    <h1 class="fs-4 m-0 fw-semibold">Products</h1>
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+
+      
+      <a href="assets/Template_File.xlsx" download="temlate.xlsx" class="download-btn"><mat-icon>upload</mat-icon> Download Import Template</a>
+
+
+      <button mat-flat-button color="primary" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon> Create Product
+      </button>
+
     </div>
-  
-    <!-- filters -->
-    <div class="d-flex flex-wrap align-items-center gap-4">
-  
-      <app-input
-        class="search-field"
-        label="Search"
-        placeholder="Search by name, SKU..."
-        subscriptSizing="fixed"
-        icon="search"
-        [maxlength]="101"
-        [customErrorMessage]="searchError()"
-        [formControl]="search"
-      />
-  
-      <mat-form-field appearance="outline" class="filter-field">
+  </div>
+
+  <!-- filters -->
+  <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
+
+    <div class="d-flex align-items-center gap-4">
+      <app-input class="search-field" label="Search" placeholder="Search by name, SKU..." subscriptSizing="dynamic"
+        icon="search" [maxlength]="101" [customErrorMessage]="searchError()" [formControl]="search" />
+
+      <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
         <mat-label>Status</mat-label>
         <mat-select [value]="statusFilter()" (selectionChange)="onStatusFilter($event.value)">
           @for (s of statusOptions; track s) {
-            <mat-option [value]="s">{{ s }}</mat-option>
+          <mat-option [value]="s">{{ s }}</mat-option>
           }
         </mat-select>
       </mat-form-field>
-  
-      <mat-form-field appearance="outline" class="filter-field-wide">
+
+      <mat-form-field appearance="outline" class="filter-field-wide" subscriptSizing="dynamic">
         <mat-label>Category</mat-label>
         <mat-select multiple [value]="selectedCategoryIds()" (selectionChange)="onCategoryFilter($event.value)">
           @for (c of allCategories(); track c.id) {
-            <mat-option [value]="c.id">{{ c.name }}</mat-option>
+          <mat-option [value]="c.id">{{ c.name }}</mat-option>
           }
         </mat-select>
       </mat-form-field>
-  
+
       @if (statusFilter() || categoryFilter() || search.value) {
-        <button mat-stroked-button (click)="clearFilters()" class="align-self-start">
-          <mat-icon>clear</mat-icon> Clear
-        </button>
+      <button mat-stroked-button (click)="clearFilters()" class="align-self-start">
+        <mat-icon>clear</mat-icon> Clear
+      </button>
       }
     </div>
-  
-    <!-- table -->
-    <div class="position-relative border-2 overflow-auto">
-      @if (loading()) {
-        <div class="loading-overlay">
-          <mat-spinner diameter="40" />
-        </div>
-      }
-  
-      <table mat-table [dataSource]="dataSource" matSort (matSortChange)="onSort($event)" class="w-100">
-  
-        <ng-container matColumnDef="sku">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>SKU</th>
-          <td mat-cell *matCellDef="let row">
-            <span class="sku-badge sku-link" (click)="openDetailDialog(row)">{{ row.sku }}</span>
-          </td>
-        </ng-container>
-  
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-          <td mat-cell *matCellDef="let row">{{ row.name }}</td>
-        </ng-container>
-  
-        <ng-container matColumnDef="categoryName">
-          <th mat-header-cell *matHeaderCellDef>Category</th>
-          <td mat-cell *matCellDef="let row">{{ row.categoryName }}</td>
-        </ng-container>
-  
-        <ng-container matColumnDef="unitOfMeasure">
-          <th mat-header-cell *matHeaderCellDef>UnitOfMeasure</th>
-          <td mat-cell *matCellDef="let row">{{ row.uomName }}</td>
-        </ng-container>
-  
-        <ng-container matColumnDef="unitPrice">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Unit Price</th>
-          <td mat-cell *matCellDef="let row">₹{{ row.unitPrice | number:'1.2-2' }}</td>
-        </ng-container>
-  
-        <ng-container matColumnDef="reorderLevel">
-          <th mat-header-cell *matHeaderCellDef>Reorder Level</th>
-          <td mat-cell *matCellDef="let row">{{ row.reorderLevel }}</td>
-        </ng-container>
-  
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
-          <td mat-cell *matCellDef="let row">
-            <mat-slide-toggle
-              class="small-switch"
-              [checked]="row.status === 'Active'"
-              color="primary"
-              (change)="$event.source.checked = row.status === 'Active'; toggleStatus(row)"
-              (click)="$event.stopPropagation()"
-            />
-          </td>
-        </ng-container>
-  
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Actions</th>
-          <td mat-cell *matCellDef="let row">
-            <button mat-icon-button [matMenuTriggerFor]="menu">
-              <mat-icon>more_vert</mat-icon>
-            </button>
-            <mat-menu #menu="matMenu">
-              <button mat-menu-item (click)="openEditDialog(row)">
-                <mat-icon>edit</mat-icon> Edit
-              </button>
-              <button mat-menu-item (click)="openDeleteDialog(row)">
-                <mat-icon>delete</mat-icon> Delete
-              </button>
-            </mat-menu>
-          </td>
-        </ng-container>
-  
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-  
-        <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell text-center no-data" [attr.colspan]="displayedColumns.length">
-            No products found.
-          </td>
-        </tr>
-      </table>
-  
-      <mat-paginator
-        [length]="totalCount()"
-        [pageSize]="pageSize()"
-        [pageIndex]="pageIndex()"
-        [pageSizeOptions]="[5, 10, 25, 50]"
-        (page)="onPage($event)"
-      />
+
+    <div class="d-flex align-items-center gap-4">
+      <button mat-stroked-button (click)="openUomDialog()">
+        <mat-icon>straighten</mat-icon> Units
+      </button>
+
+      <label mat-stroked-button class="import-btn" [class.loading-btn]="importing()">
+        @if (importing()) {
+        <mat-spinner diameter="18" />
+        } @else {
+        <mat-icon>upload</mat-icon>
+        }
+        Import Products
+        <input type="file" accept=".xlsx" (change)="onImport($event)" class="d-none" />
+      </label>
+
+      <button mat-stroked-button (click)="onExport()" [disabled]="exporting()">
+        @if (exporting()) {
+        <mat-spinner diameter="18" />
+        } @else {
+        <mat-icon>download</mat-icon>
+        }
+        Export Products
+      </button>
     </div>
   </div>
+
+  <!-- table -->
+  <div class="position-relative border-2 overflow-auto">
+    @if (loading()) {
+    <div class="loading-overlay">
+      <mat-spinner diameter="40" />
+    </div>
+    }
+
+    <table mat-table [dataSource]="dataSource" matSort (matSortChange)="onSort($event)" class="w-100">
+
+      <ng-container matColumnDef="sku">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>SKU</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="sku-badge sku-link" (click)="openDetailDialog(row)">{{ row.sku }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+        <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="categoryName">
+        <th mat-header-cell *matHeaderCellDef>Category</th>
+        <td mat-cell *matCellDef="let row">{{ row.categoryName }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="unitOfMeasure">
+        <th mat-header-cell *matHeaderCellDef>UnitOfMeasure</th>
+        <td mat-cell *matCellDef="let row">{{ row.uomName }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="unitPrice">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Unit Price</th>
+        <td mat-cell *matCellDef="let row">₹{{ row.unitPrice | number:'1.2-2' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="reorderLevel">
+        <th mat-header-cell *matHeaderCellDef>Reorder Level</th>
+        <td mat-cell *matCellDef="let row">{{ row.reorderLevel }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let row">
+          <mat-slide-toggle class="small-switch" [checked]="row.status === 'Active'" color="primary"
+            (change)="$event.source.checked = row.status === 'Active'; toggleStatus(row)"
+            (click)="$event.stopPropagation()" />
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let row">
+          <button mat-icon-button [matMenuTriggerFor]="menu">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="openEditDialog(row)">
+              <mat-icon>edit</mat-icon> Edit
+            </button>
+            <button mat-menu-item (click)="openDeleteDialog(row)">
+              <mat-icon>delete</mat-icon> Delete
+            </button>
+          </mat-menu>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell text-center no-data" [attr.colspan]="displayedColumns.length">
+          No products found.
+        </td>
+      </tr>
+    </table>
+
+    <mat-paginator [length]="totalCount()" [pageSize]="pageSize()" [pageIndex]="pageIndex()"
+      [pageSizeOptions]="[5, 10, 25, 50]" (page)="onPage($event)" />
+  </div>
+</div>

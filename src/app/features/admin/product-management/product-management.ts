@@ -27,6 +27,7 @@ import { ProductFormDialog } from './components/product-form-dialog/product-form
 import { UomDialog } from './components/uom-dialog/uom-dialog';
 import { ProductDetailDialog } from './components/product-detail-dialog/product-detail-dialog';
 import { ProductCategoryDropdownResponse } from '../product-category/models/product-category-models';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-product-management',
@@ -58,6 +59,7 @@ export class ProductManagement implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly toast = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly http = inject(HttpClient)
 
   displayedColumns = ['sku', 'name', 'categoryName', 'unitOfMeasure', 'unitPrice', 'reorderLevel', 'status', 'actions'];
   dataSource = new MatTableDataSource<ProductResponse>();
