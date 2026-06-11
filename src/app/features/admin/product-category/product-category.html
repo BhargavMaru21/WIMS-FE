@@ -1,0 +1,116 @@
+<div class="d-flex flex-column gap-4 ">
+    <!-- header  -->
+    <div class="d-flex align-items-center justify-content-between">
+      <h1 class="fs-4 m-0 fw-semibold">Product Categories</h1>
+      <button mat-flat-button color="primary" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon> Create Product Category
+      </button>
+    </div>
+  
+   <!-- filters  -->
+    <div class="d-flex flex-wrap align-items-center gap-4">
+      <app-input
+      class="search-field"
+      label="Search"
+      placeholder="Search by name, description..."
+      subscriptSizing="fixed"
+      icon="search"
+      [maxlength]="101"
+      [customErrorMessage]="searchError()"
+      [formControl]="search"
+    />
+  
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Status</mat-label>
+        <mat-select [value]="statusFilter()" (selectionChange)="onStatusFilter($event.value)">
+          <mat-option value="">All</mat-option>
+          @for (s of statusOptions; track s) {
+            <mat-option [value]="s">{{ s }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+  
+      @if (statusFilter() || search.value) {
+        <button mat-stroked-button (click)="clearFilters()" class="align-self-start">
+          <mat-icon>clear</mat-icon> Clear
+        </button>
+      }
+    </div>
+  
+    <!-- table -->
+    <div class="position-relative border-2 overflow-auto">
+      @if (loading()) {
+        <div class="loading-overlay">
+          <mat-spinner diameter="40" />
+        </div>
+      } 
+        <table mat-table [dataSource]="dataSource" matSort (matSortChange)="onSort($event)" class="w-100">
+  
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Id</th>
+            <td mat-cell *matCellDef="let row">{{ row.id }}</td>
+          </ng-container>
+    
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+            <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+          </ng-container>
+    
+          <ng-container matColumnDef="description">
+            <th mat-header-cell *matHeaderCellDef>Description</th>
+            <td mat-cell *matCellDef="let row">
+              <span [class.no-value] = "!row.description">{{ row.description ?? "No Description"}}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let row">
+              <mat-slide-toggle class="small-switch"
+              [checked]="row.status === 'Active'"
+              color="primary"
+              [disabled]="false"
+              (change)="
+              $event.source.checked = row.status === 'Active';
+              toggleStatus(row)
+              "
+              (click)="$event.stopPropagation()"
+            ></mat-slide-toggle>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let row">
+              <button mat-icon-button [matMenuTriggerFor]="menu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="openEditDialog(row)">
+                  <mat-icon>edit</mat-icon> Edit
+                </button>
+                <button mat-menu-item (click)="openDeleteDialog(row)">
+                  <mat-icon>delete</mat-icon> Delete
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+    
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell text-center no-data" [attr.colspan]="displayedColumns.length">
+              No Product Category found.
+            </td>
+          </tr>
+        </table>
+    
+        <mat-paginator
+          [length]="totalCount()"
+          [pageSize]="pageSize()"
+          [pageIndex]="pageIndex()"
+          [pageSizeOptions]="[5,10, 25, 50]"
+          (page)="onPage($event)"
+        />
+    </div>
+  </div>

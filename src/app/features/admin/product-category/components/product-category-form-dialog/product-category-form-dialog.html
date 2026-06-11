@@ -1,0 +1,21 @@
+<app-dialog
+  [loading]="loading()"
+  [submitDisabled]="form.invalid"
+  (submitted)="onSubmit()"
+>
+  <form [formGroup]="form">
+    <app-input
+      class="mb-3"
+      formControlName="name"
+      label="Category Name"
+      placeholder="Enter category name"
+      [customErrorMessage]="getError('name')"
+    />
+    <app-input
+      formControlName="description"
+      label="Description"
+      placeholder="Enter description (optional)"
+      [customErrorMessage]="getError('description')"
+    />
+  </form>
+</app-dialog>

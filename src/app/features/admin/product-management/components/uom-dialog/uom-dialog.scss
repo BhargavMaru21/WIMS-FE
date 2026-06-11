@@ -1,30 +1,10 @@
-.dialog-title {
-    color: #0f172a;
-}
-
-.close-btn {
-    height: 30px;
-    width: 30px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    border-radius: 6px;
+.dialog-footer {
     display: flex;
     align-items: center;
-    transition: color 0.15s, background 0.15s;
-
-    &:hover {
-        background: #f1f5f9;
-        color: #475569;
-    }
-
-    .icon {
-        font-size:15px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 24px 20px;
+    border-top: 1px solid #f1f5f9;
 }
 
 .btn-cancel {
@@ -39,14 +19,18 @@
     cursor: pointer;
     transition: background 0.15s, border-color 0.15s;
 
-    &:hover {
+    &:hover:not(:disabled) {
         background: #f8fafc;
         border-color: #94a3b8;
     }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
 }
 
-
-.btn-confirm {
+.btn-submit {
     height: 38px;
     padding: 0 20px;
     border: none;
@@ -63,8 +47,12 @@
     min-width: 90px;
     justify-content: center;
 
-    &:hover {
+    &:hover:not(:disabled) {
         background: #1d4ed8;
     }
 
+    &:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
 }

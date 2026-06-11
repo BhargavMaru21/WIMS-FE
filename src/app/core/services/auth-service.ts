@@ -157,13 +157,11 @@ export class AuthService {
   }
 
   getDashboardRoute(): string {
-    console.log('User role:', this.role());
-
     switch (this.role()) {
       case 'Administrator':
         return '/admin/users';
       case 'WarehouseManager':
-        return '/success';
+        return '/manager/purchase-order';
       case 'StockKeeper':
         return '/success';
       default:
