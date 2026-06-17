@@ -77,8 +77,8 @@ export class InputComponent implements ControlValueAccessor, AfterViewInit, OnDe
   private subscription = new Subscription();
   private wasTouched = false;
 
-  onChange: (val: InputValue) => void = () => {};
-  onTouched = () => {};
+  onChange: (val: InputValue) => void = () => { };
+  onTouched = () => { };
 
   constructor(@Optional() @Self() public ngControl: NgControl) {
     if (this.ngControl) {
@@ -105,7 +105,7 @@ export class InputComponent implements ControlValueAccessor, AfterViewInit, OnDe
       Object.defineProperty(this.matInput, 'errorState', {
         get: () => {
           const control = this.ngControl?.control;
-          const isInteracted = !!(control && (control.touched || control.dirty));
+          const isInteracted = !!(control && (control.touched));
           const hasControlErrors = !!(control && control.invalid && isInteracted);
           const hasCustomError = !!(this.customErrorMessage && isInteracted);
           return hasControlErrors || hasCustomError;
@@ -191,7 +191,7 @@ export class InputComponent implements ControlValueAccessor, AfterViewInit, OnDe
     this.iconClick.emit();
   }
 
-  
+
   // The actual input type to bind — handles password show/hide toggle 
   get effectiveType(): string {
     if (this.type === 'password') {
@@ -208,10 +208,10 @@ export class InputComponent implements ControlValueAccessor, AfterViewInit, OnDe
   get errorMessage(): string {
     const control = this.ngControl?.control;
     if (!control) return '';
+    //after focus loss error will be shown
+    if (!control.touched) return '';
 
-    if (this.customErrorMessage && (control.touched || control.dirty)) {
-      return this.customErrorMessage;
-    }
+    if (this.customErrorMessage) return this.customErrorMessage;
 
     if (!control.errors) return '';
     const errors = control.errors;

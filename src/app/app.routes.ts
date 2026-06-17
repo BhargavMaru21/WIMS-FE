@@ -129,6 +129,13 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'purchase-order/:id/items',
+        loadComponent: () =>
+          import('./features/manager/purchase-order-item/purchase-order-item.js').then(
+            (m) => m.PurchaseOrderItem,
+          ),
+      },
+      {
         path: 'profile',
         loadComponent: () =>
           import('./features/profile/profile.js').then((m) => m.ProfileComponent),

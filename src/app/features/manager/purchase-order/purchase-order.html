@@ -1,1 +1,143 @@
-<p>purchase-order works!</p>
+<div class="d-flex flex-column gap-4">
+
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <h1 class="fs-4 m-0 fw-semibold">Purchase Orders</h1>
+      <button mat-flat-button color="primary" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon> Create Purchase Order
+      </button>
+    </div>
+  
+    <div class="d-flex flex-wrap align-items-center gap-4">
+  
+      <app-input
+        class="search-field"
+        label="Search"
+        placeholder="Search by PO number, supplier..."
+        subscriptSizing="fixed"
+        icon="search"
+        [maxlength]="101"
+        [customErrorMessage]="searchError()"
+        [formControl]="search"
+      />
+  
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Status</mat-label>
+        <mat-select [value]="statusFilter()" (selectionChange)="onStatusFilter($event.value)">
+          <mat-option value="">All</mat-option>
+          @for (s of statusOptions; track s) {
+            <mat-option [value]="s">{{ s }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+  
+      @if (statusFilter() || search.value) {
+        <button mat-stroked-button (click)="clearFilters()" class="align-self-start">
+          <mat-icon>clear</mat-icon> Clear
+        </button>
+      }
+    </div>
+  
+    <div class="position-relative border-2 overflow-auto">
+      @if (loading()) {
+        <div class="loading-overlay">
+          <mat-spinner diameter="40" />
+        </div>
+      }
+  
+      <table mat-table [dataSource]="dataSource" matSort (matSortChange)="onSort($event)" class="w-100">
+  
+        <ng-container matColumnDef="poNumber">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>PO Number</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="po-badge">{{ row.poNumber }}</span>
+          </td>
+        </ng-container>
+  
+        <ng-container matColumnDef="supplierName">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Supplier</th>
+          <td mat-cell *matCellDef="let row">{{ row.supplierName }}</td>
+        </ng-container>
+  
+        <ng-container matColumnDef="orderDate">
+          <th mat-header-cell *matHeaderCellDef>Order Date</th>
+          <td mat-cell *matCellDef="let row">{{ row.orderDate ? (row.orderDate | date:'mediumDate') : '—' }}</td>
+        </ng-container>
+  
+        <ng-container matColumnDef="expectedDelivery">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Expected Delivery</th>
+          <td mat-cell *matCellDef="let row">{{ row.expectedDelivery | date:'mediumDate' }}</td>
+        </ng-container>
+  
+        <ng-container matColumnDef="totalAmount">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Total</th>
+          <td mat-cell *matCellDef="let row">₹{{ row.totalAmount | number:'1.2-2' }}</td>
+        </ng-container>
+  
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="status-chip" [ngClass]="statusClass(row.status)">{{ row.status }}</span>
+          </td>
+        </ng-container>
+  
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let row">
+            <button mat-icon-button [matMenuTriggerFor]="menu" (click)="$event.stopPropagation()">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+  
+              @if (row.canEdit) {
+                <button mat-menu-item (click)="openEditDialog(row)">
+                  <mat-icon>edit</mat-icon> Edit
+                </button>
+                <button mat-menu-item (click)="submitPo(row)">
+                  <mat-icon>send</mat-icon> Submit for Approval
+                </button>
+                <button mat-menu-item (click)="cancelPo(row)">
+                  <mat-icon>block</mat-icon> Cancel
+                </button>
+              }
+  
+              @if (row.status === 'Submitted') {
+                @if (row.canApprove) {
+                  <button mat-menu-item (click)="approvePo(row)">
+                    <mat-icon>check_circle</mat-icon> Approve
+                  </button>
+                  <button mat-menu-item (click)="rejectPo(row)">
+                    <mat-icon>cancel</mat-icon> Reject
+                  </button>
+                } @else {
+                  <button mat-menu-item (click)="cancelPo(row)">
+                    <mat-icon>block</mat-icon> Cancel
+                  </button>
+                }
+              }
+  
+              <button mat-menu-item (click)="goToItems(row)">
+                <mat-icon>list_alt</mat-icon> View Items
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+  
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="clickable-row" (click)="goToItems(row)"></tr>
+  
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell text-center no-data" [attr.colspan]="displayedColumns.length">
+            No purchase orders found.
+          </td>
+        </tr>
+      </table>
+  
+      <mat-paginator
+        [length]="totalCount()"
+        [pageSize]="pageSize()"
+        [pageIndex]="pageIndex()"
+        [pageSizeOptions]="[5, 10, 25, 50]"
+        (page)="onPage($event)"
+      />
+    </div>
+  </div>

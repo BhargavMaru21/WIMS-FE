@@ -1,0 +1,200 @@
+@if(po() == null){
+  <div>
+    Not found
+    <button mat-stroked-button (click)="goBack()">
+      Go Back
+    </button>
+  </div>
+}@else {
+
+  <div class="d-flex flex-column gap-4">
+  
+    <div class="d-flex align-items-center gap-2">
+      <button mat-icon-button (click)="goBack()" matTooltip="Back to purchase orders">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1 class="fs-4 m-0 fw-semibold">
+        {{ po()?.poNumber ?? 'Purchase Order' }} — Items
+      </h1>
+      @if (po(); as p) {
+      <span class="status-chip" [ngClass]="statusClass(p.status)">{{ p.status }}</span>
+      }
+    </div>
+  
+    @if (po(); as p) {
+    <div class="po-summary-card">
+      <div class="summary-item">
+        <span class="summary-label">Supplier Name</span>
+        <span class="summary-value">{{ p.supplierName }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Supplier Contact</span>
+        <span class="summary-value">
+          <span [class.no-value]="!p.supplierContact">{{ p.supplierContact ?? 'No Contact'}}</span>
+        </span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Warehouse</span>
+        <span class="summary-value">{{ p.warehouseName }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Total Amount</span>
+        <span class="summary-value price">₹{{ p.totalAmount | number:'1.2-2' }}</span>
+      </div>
+      @if(p.orderDate){
+      <div class="summary-item">
+        <span class="summary-label">Order Date</span>
+        <span class="summary-value">{{ p.orderDate | date:'mediumDate'}}</span>
+      </div>
+      }
+      <div class="summary-item">
+        <span class="summary-label">Expected Delivery</span>
+        <span class="summary-value">{{ p.expectedDelivery | date:'mediumDate' }}</span>
+      </div>
+      <div class="summary-item full-width">
+        <span class="summary-label">Note</span>
+        <span class="summary-value">
+          <span [class.no-value]="!p.notes">{{ p.notes ?? 'No Note'}}</span>
+        </span>
+      </div>
+      @if(p.status != "Draft"){
+      @if(p.submittedByName && p.submittedAt){
+      <div class="summary-item">
+        <span class="summary-label">Submitted By</span>
+        <span class="summary-value">{{ p.submittedByName }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Submitted At</span>
+        <span class="summary-value">{{ p.submittedAt | date:'mediumDate' }}</span>
+      </div>
+      }
+  
+      @if(p.status == "Rejected"){
+      <div class="summary-item">
+        <span class="summary-label">Rejected By</span>
+        <span class="summary-value">{{ p.rejectedByName }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Rejected At</span>
+        <span class="summary-value">{{ p.rejectedAt | date:'mediumDate' }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Rejection Reason</span>
+        <span class="summary-value">{{ p.rejectionReason }}</span>
+      </div>
+      }
+      @else if(p.status == "Cancelled"){
+      <div class="summary-item">
+        <span class="summary-label">Cancelled By</span>
+        <span class="summary-value">{{ p.cancelledByName }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Cancelled At</span>
+        <span class="summary-value">{{ p.cancelledAt | date:'mediumDate' }}</span>
+      </div>
+      }
+      @else if(p.status == "Approved" || p.status == "PartiallyReceived" || p.status == "FullyReceived"){
+      <div class="summary-item">
+        <span class="summary-label">Approved By</span>
+        <span class="summary-value">{{ p.approvedByName }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Approved At</span>
+        <span class="summary-value">{{ p.approvedAt | date:'mediumDate'}}</span>
+      </div>
+      }
+      }
+    </div>
+    }
+  
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <div class="d-flex align-items-center gap-2">
+        <app-input class="search-field" label="Search items" placeholder="Search by product name..."
+        subscriptSizing="dynamic" icon="search" [maxlength]="101" [customErrorMessage]="searchError()"
+        [formControl]="search" />
+
+         @if (search.value) {
+          <button mat-stroked-button (click)="clearFilters()">
+            <mat-icon>clear</mat-icon> Clear
+          </button>
+        }
+      </div>
+  
+      @if (canManageItems) {
+      <button mat-flat-button color="primary" (click)="openAddItemDialog()">
+        <mat-icon>add</mat-icon> Add Item
+      </button>
+      }
+    </div>
+  
+    <div class="position-relative border-2 overflow-auto">
+      @if (loading()) {
+      <div class="loading-overlay">
+        <mat-spinner diameter="40" />
+      </div>
+      }
+
+      <div>
+        <h5>List Of Items</h5>
+      </div>
+  
+      <table mat-table [dataSource]="dataSource" matSort (matSortChange)="onSort($event)" class="w-100">
+  
+        <ng-container matColumnDef="productName">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Product</th>
+          <td mat-cell *matCellDef="let row">{{ row.productName }}</td>
+        </ng-container>
+  
+        <ng-container matColumnDef="orderedQty">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Ordered Qty</th>
+          <td mat-cell *matCellDef="let row">{{ row.orderedQty }} {{ row.uomAbbreviation }}</td>
+        </ng-container>
+  
+        <ng-container matColumnDef="unitPrice">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Unit Price</th>
+          <td mat-cell *matCellDef="let row">₹{{ row.unitPrice | number:'1.2-2' }}</td>
+        </ng-container>
+  
+        <ng-container matColumnDef="lineTotal">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Line Total</th>
+          <td mat-cell *matCellDef="let row">₹{{ row.lineTotal | number:'1.2-2' }}</td>
+        </ng-container>
+  
+        <ng-container matColumnDef="receivedQty">
+          <th mat-header-cell *matHeaderCellDef>Received</th>
+          <td mat-cell *matCellDef="let row">{{ row.receivedQty }} / {{ row.orderedQty }} {{ row.uomAbbreviation }}</td>
+        </ng-container>
+  
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let row">
+            @if (canManageItems) {
+            <button mat-icon-button [matMenuTriggerFor]="menu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="openEditItemDialog(row)">
+                <mat-icon>edit</mat-icon> Edit Quantity
+              </button>
+              <button mat-menu-item (click)="removeItem(row)">
+                <mat-icon>delete</mat-icon> Remove
+              </button>
+            </mat-menu>
+            } @else {
+            <span class="text-muted">—</span>
+            }
+          </td>
+        </ng-container>
+  
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell text-center no-data" [attr.colspan]="displayedColumns.length">
+            No items added to this purchase order yet.
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+}

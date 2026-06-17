@@ -1,0 +1,42 @@
+<app-dialog
+  [loading]="loading()"
+  [submitDisabled]="form.invalid"
+  (submitted)="onSubmit()"
+>
+  <form [formGroup]="form" class="dialog-form">
+
+    <app-input
+      class="mb-3"
+      formControlName="supplierName"
+      label="Supplier Name"
+      placeholder="Enter supplier name"
+      [customErrorMessage]="getError('supplierName')"
+    />
+
+    <app-input
+      class="mb-3"
+      formControlName="supplierContact"
+      label="Supplier Contact"
+      placeholder="Supplier Phone"
+      [customErrorMessage]="getError('supplierContact')"
+    />
+
+    <mat-form-field appearance="outline" class="mb-3 w-100" subscriptSizing="dynamic">
+      <mat-label>Expected Delivery</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="expectedDelivery" [min]="minDate" [max]="maxDate" readonly (click)="picker.open()">
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker [startAt]="minDate"></mat-datepicker>
+      @if (form.get('expectedDelivery')?.invalid && form.get('expectedDelivery')?.touched) {
+        <mat-error>{{ getError('expectedDelivery') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <app-input
+      formControlName="notes"
+      label="Notes"
+      placeholder="Additional notes (optional)"
+      [customErrorMessage]="getError('notes')"
+    />
+
+  </form>
+</app-dialog>

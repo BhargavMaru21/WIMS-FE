@@ -1,0 +1,37 @@
+<app-dialog
+  [loading]="loading()"
+  [submitDisabled]="form.invalid"
+  (submitted)="onSubmit()"
+>
+  <form [formGroup]="form" class="dialog-form">
+
+    <mat-form-field appearance="outline" class="mb-3 w-100" subscriptSizing="dynamic">
+      <mat-label>Product</mat-label>
+      <mat-select formControlName="productId">
+        @for (p of products; track p.id) {
+          <mat-option [value]="p.id">{{ p.name }} (₹{{p.unitPrice | number: '1.2-2'}})</mat-option>
+        }
+      </mat-select>
+      @if (form.get('productId')?.invalid && form.get('productId')?.touched) {
+        <mat-error>{{ getError('productId') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- @if (selectedProduct(); as p) {
+      <p class="product-hint">
+        Unit price: <strong>₹{{ p.unitPrice | number:'1.2-2' }}</strong>
+      </p>
+    } -->
+
+    <app-input
+      formControlName="orderedQty"
+      label="Ordered Quantity"
+      placeholder="0"
+      type="number"
+      [min]="0.01"
+      [step]="0.01"
+      [customErrorMessage]="getError('orderedQty')"
+    />
+
+  </form>
+</app-dialog>

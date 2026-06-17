@@ -1,0 +1,65 @@
+.search-field {
+  flex: 1 1 260px;
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.filter-field {
+  flex: 0 0 180px;
+}
+
+.no-data {
+  padding: 32px;
+  color: #49454f;
+}
+
+.po-badge {
+  font-family: monospace;
+  font-size: 0.8rem;
+  background: #f3f3f3;
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: #333;
+}
+
+.clickable-row {
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.03);
+  }
+}
+
+.status-chip {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  display: inline-block;
+
+  &.status-draft {
+    background: #f1f5f9;
+    color: #475569;
+  }
+
+  &.status-submitted {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  &.status-approved {
+    background: #dcfce7;
+    color: #15803d;
+  }
+
+  &.status-rejected {
+    background: #fee2e2;
+    color: #b91c1c;
+  }
+
+  &.status-cancelled {
+    background: #e5e7eb;
+    color: #4b5563;
+  }
+}

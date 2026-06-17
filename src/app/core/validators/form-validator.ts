@@ -29,14 +29,14 @@ export function passwordValidator(): ValidatorFn {
 
 
 export function getEmailError(control: AbstractControl | null): string {
-    if (!control || (!control.touched && !control.dirty)) return ''; 
+    if (!control || (!control.touched)) return ''; 
     if (control.errors?.['required']) return 'Email address is required';
     if (control.errors?.['invalidEmail']) return 'Enter a valid email address (e.g. you@company.com)';
     return '';
 }
 
 export function getPasswordError(control: AbstractControl | null): string {
-    if (!control || (!control.touched && !control.dirty)) return '';
+    if (!control || (!control.touched)) return '';
     if (control.errors?.['required']) return 'Password is required';
 
     const sp = control.errors?.['strongPassword'];
