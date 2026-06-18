@@ -1,42 +1,63 @@
-<app-dialog
-  [loading]="loading()"
-  [submitDisabled]="form.invalid"
-  (submitted)="onSubmit()"
->
+<app-dialog [loading]="loading()" [submitDisabled]="form.invalid" (submitted)="onSubmit()">
   <form [formGroup]="form" class="dialog-form">
 
-    <app-input
-      class="mb-3"
-      formControlName="supplierName"
-      label="Supplier Name"
-      placeholder="Enter supplier name"
-      [customErrorMessage]="getError('supplierName')"
-    />
+    <app-input class="mb-3" formControlName="supplierName" label="Supplier Name" placeholder="Enter supplier name"
+      [customErrorMessage]="getError('supplierName')" />
 
-    <app-input
-      class="mb-3"
-      formControlName="supplierContact"
-      label="Supplier Contact"
-      placeholder="Supplier Phone"
-      [customErrorMessage]="getError('supplierContact')"
-    />
+    <app-input class="mb-3" formControlName="supplierContact" label="Supplier Contact" placeholder="Supplier Phone"
+      [customErrorMessage]="getError('supplierContact')" />
 
     <mat-form-field appearance="outline" class="mb-3 w-100" subscriptSizing="dynamic">
       <mat-label>Expected Delivery</mat-label>
-      <input matInput [matDatepicker]="picker" formControlName="expectedDelivery" [min]="minDate" [max]="maxDate" readonly (click)="picker.open()">
+      <input matInput [matDatepicker]="picker" formControlName="expectedDelivery" [min]="minDate" [max]="maxDate"
+        readonly (click)="picker.open()">
       <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
       <mat-datepicker #picker [startAt]="minDate"></mat-datepicker>
       @if (form.get('expectedDelivery')?.invalid && form.get('expectedDelivery')?.touched) {
-        <mat-error>{{ getError('expectedDelivery') }}</mat-error>
+      <mat-error>{{ getError('expectedDelivery') }}</mat-error>
       }
     </mat-form-field>
 
-    <app-input
-      formControlName="notes"
-      label="Notes"
-      placeholder="Additional notes (optional)"
-      [customErrorMessage]="getError('notes')"
-    />
-
+    <app-input formControlName="notes" label="Notes" placeholder="Additional notes (optional)"
+      [customErrorMessage]="getError('notes')" />
   </form>
+  @if(!isEdit())
+  {
+  <div class="d-flex flex-column gap-2">
+    <div class="my-3 fs-6">Add Items :</div>
+
+    @for(item of selectedItems ; track $index){
+    <div class="d-flex flex-row gap-2">
+      <mat-form-field appearance="outline" class="mb-3 w-100" subscriptSizing="dynamic">
+        <mat-label>Product</mat-label>
+        <mat-select [(ngModel)]="item.productId" (selectionChange)="onSelectChange($event.value)">
+          @for (p of allProducts(); track p.id) {
+          <mat-option [value]="p.id">{{ p.name }} (₹{{p.unitPrice | number: '1.2-2'}})</mat-option>
+          }
+        </mat-select>
+        @if (form.get('productId')?.invalid && form.get('productId')?.touched) {
+        <mat-error>{{ getError('productId') }}</mat-error>
+        }
+      </mat-form-field>
+
+      <div class="d-flex gap-2">
+        <app-input label="Ordered Quantity" [(ngModel)]="item.orderedQty" placeholder="0" type="number" [min]="0.01"
+        [step]="0.01" [customErrorMessage]="getError('orderedQty')"  />
+         <div class="linetotal">{{getLineTotal(item)}}</div>
+      </div>
+
+
+      <button mat-icon-button (click)="AddNewRow()" class="">
+        <mat-icon>add</mat-icon>
+      </button>
+      <button mat-icon-button (click)="DeleteRow($index)" matTooltip="Delete Item">
+        <mat-icon>delete</mat-icon>
+      </button>
+
+    </div>
+
+    }
+    <div class="fs-6 fw-bold">Total Amount : <span>{{getGrandTotal()}}</span></div>
+  </div>
+  }
 </app-dialog>

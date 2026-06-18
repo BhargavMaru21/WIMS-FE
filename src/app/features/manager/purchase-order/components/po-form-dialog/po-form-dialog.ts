@@ -1,17 +1,29 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { provideNativeDateAdapter } from '@angular/material/core';
+import { provideNativeDateAdapter, MatOption } from '@angular/material/core';
 import { finalize } from 'rxjs';
 import { PurchaseOrderService } from '../../services/po-service';
-import { PoResponse } from '../../models/po-models';
+import { PoCreateRequest, PoItemCreateRequest, PoResponse, ProductDropdown } from '../../models/po-models';
 import { InputComponent } from '../../../../../shared/components/input/input';
 import { DialogComponent, DialogConfig } from '../../../../../shared/components/dialog/dialog';
 import { ToastService } from '../../../../../core/services/toast-service';
+import { MatIcon, MatIconModule } from "@angular/material/icon";
+import { ProductService } from '../../../../admin/product-management/services/product-service';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+
+interface PoItemCreateDemoRequest {
+  productId: number;
+  orderedQty: number;
+  lineTotal?: number
+}
 
 @Component({
   selector: 'app-po-form-dialog',
@@ -24,19 +36,32 @@ import { ToastService } from '../../../../../core/services/toast-service';
     MatInputModule,
     InputComponent,
     DialogComponent,
-  ],
+    MatIconModule,
+    MatSelectModule,
+    MatButtonModule,
+    FormsModule 
+],
   providers: [provideNativeDateAdapter()],
   templateUrl: './po-form-dialog.html',
 })
 export class PoFormDialog implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly service = inject(PurchaseOrderService);
+  private readonly productService = inject(ProductService)
   private readonly toast = inject(ToastService);
   readonly dialogRef = inject(MatDialogRef<PoFormDialog>);
   readonly data: { config: DialogConfig; po?: PoResponse } = inject(MAT_DIALOG_DATA);
 
   loading = signal(false);
   isEdit = signal(false);
+  allProducts = signal<ProductDropdown[]>([]);
+  productPrice = signal(0);
+  qnt = signal(0);
+  quantity =  new FormControl('')
+
+  selectedItems: PoItemCreateDemoRequest[] = [
+    { productId: 0, orderedQty: 1 } 
+  ];
 
   minDate = new Date(Date.now() + 86400000); // tomorrow
   maxDate = new Date(2026, 11, 31); 
@@ -70,13 +95,62 @@ export class PoFormDialog implements OnInit {
         notes: po.notes ?? '',
       });
     }
+
+    this.loadProducts()
   }
+
+  loadProducts(): void {
+    this.productService.getProducts({ pageNumber: 1, pageSize: 100, sortDirection: 'asc' }, { Status: 'Active' }).subscribe({
+      next: res => {
+        if (res.isSuccess && res.data) {
+          this.allProducts.set(res.data.items.map(p => ({
+            id: p.id,
+            name: p.name,
+            unitPrice: p.unitPrice
+          })));
+        }
+      }
+    });
+  }
+
+  getProductPrice(id : number):number{
+    let product = this.allProducts().find(x => x.id === id)
+    return product?.unitPrice ?? 0;
+  }
+
+  getLineTotal(item : PoItemCreateRequest) : number{
+    return this.getProductPrice(item.productId) * item.orderedQty
+  }
+
+  getGrandTotal(){
+    return this.selectedItems.reduce((sum,item) => sum + this.getLineTotal(item) , 0)
+  }
+  onSelectChange(value:number){
+    let product = this.allProducts().find(x => x.id === value)
+    this.productPrice.set(product!.unitPrice)
+  }
+
+  AddNewRow(){
+    this.selectedItems.push({ productId: 0, orderedQty: 1 });
+  }
+
+  DeleteRow(index: number){
+    console.log(index);
+    if(this.selectedItems.length == 1 ) 
+        return this.toast.error("At Least One Item required") 
+    this.selectedItems.splice(index, 1);
+  }
+
 
   onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
+
+    const validSelections = this.selectedItems.filter(item => item.productId !== 0);
+    if(validSelections.length == 0)
+        return this.toast.error("At least one product item need to select");
 
     this.loading.set(true);
     const raw = this.form.getRawValue();
@@ -95,6 +169,7 @@ export class PoFormDialog implements OnInit {
         supplierContact: raw.supplierContact || undefined,
         expectedDelivery,
         notes: raw.notes || undefined,
+        itemList : validSelections
       });
 
     request$.pipe(finalize(() => this.loading.set(false))).subscribe({

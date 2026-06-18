@@ -52,6 +52,7 @@ export interface PoCreateRequest {
     supplierContact?: string;
     expectedDelivery: string;
     notes?: string;
+    itemList : PoItemCreateRequest[]
 }
 
 export interface PoUpdateRequest {
