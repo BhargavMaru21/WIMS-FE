@@ -55,6 +55,7 @@ export class PurchaseOrderItem implements OnInit {
 
   poId = signal(0);
   po = signal<PoResponse | null>(null);
+  notFound = signal(false);
   loading = signal(false);
 
   displayedColumns = ['productName', 'orderedQty', 'unitPrice', 'lineTotal', 'receivedQty', 'actions'];
@@ -72,6 +73,12 @@ export class PurchaseOrderItem implements OnInit {
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
+
+    if (!id || id <= 0) {
+      this.notFound.set(true);
+      return;
+    }
+
     this.poId.set(id);
 
     this.search.valueChanges.pipe(
@@ -92,6 +99,9 @@ export class PurchaseOrderItem implements OnInit {
           this.po.set(res.data);
           this.dataSource.data = this.sortItems(res.data.items);
         }
+      },
+      error : err => {
+        this.notFound.set(true);
       }
     });
   }
@@ -144,8 +154,9 @@ export class PurchaseOrderItem implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/manager/purchase-orders']);
-  }
+  const isAdminRoute = this.router.url.startsWith('/admin');
+  this.router.navigate([isAdminRoute ? '/admin/purchase-orders' : '/manager/purchase-order']);
+}
 
   clearFilters(): void{
     this.search.setValue('')
@@ -187,7 +198,7 @@ export class PurchaseOrderItem implements OnInit {
       this.service.removeItem(this.poId(), item.id).subscribe({
         next: res => {
           if (res.isSuccess) {
-            this.toast.success('Item removed.');
+            this.toast.success(res.data ?? 'Item removed.');
             this.loadPo();
           }
         }

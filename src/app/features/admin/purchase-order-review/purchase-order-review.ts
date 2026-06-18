@@ -12,22 +12,25 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { debounceTime, distinctUntilChanged, finalize } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { InputComponent } from '../../../shared/components/input/input';
 import { DialogService } from '../../../core/services/dialog-service';
 import { ToastService } from '../../../core/services/toast-service';
-import { AuthService } from '../../../core/services/auth-service';
 import { ConfirmDialog } from '../../../shared/components/confirm-dialog/confirm-dialog';
-import { PurchaseOrderService } from './services/po-service';
-import { PO_STATUS, PoResponse, PoStatus } from './models/po-models';
-import { PoFormDialog } from './components/po-form-dialog/po-form-dialog';
-import { PoRejectDialog } from './components/po-reject-dialog/po-reject-dialog';
+import { PurchaseOrderService } from '../../manager/purchase-order/services/po-service';
+import { PO_STATUS, PoResponse, PoStatus } from '../../manager/purchase-order/models/po-models';
+import { PoRejectDialog } from '../../manager/purchase-order/components/po-reject-dialog/po-reject-dialog';
+import { WarehouseManagementService } from '../warehouse-management/services/warehouse-service';
+
+interface WarehouseDropdown {
+  id: number;
+  name: string;
+}
 
 @Component({
-  selector: 'app-purchase-order-management',
+  selector: 'app-purchase-order-review',
   standalone: true,
   imports: [
     CommonModule,
@@ -42,21 +45,21 @@ import { PoRejectDialog } from './components/po-reject-dialog/po-reject-dialog';
     MatIconModule,
     MatMenuModule,
     MatProgressSpinnerModule,
-    MatTooltipModule,
     InputComponent,
   ],
-  templateUrl: './purchase-order.html',
-  styleUrl: './purchase-order.scss',
+  templateUrl: './purchase-order-review.html',
+  styleUrl: './purchase-order-review.scss',
 })
-export class PurchaseOrder implements OnInit {
+export class PurchaseOrderReview implements OnInit {
   private readonly service = inject(PurchaseOrderService);
-  private readonly dialogSvc = inject(DialogService);
+  private readonly warehouseService = inject(WarehouseManagementService);
+  private readonly dialogService = inject(DialogService);
   private readonly dialog = inject(MatDialog);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
-  displayedColumns = ['poNumber', 'supplierName', 'orderDate', 'expectedDelivery', 'totalAmount', 'status', 'actions'];
+  displayedColumns = ['poNumber', 'supplierName', 'warehouseName', 'orderDate', 'expectedDelivery', 'totalAmount', 'status', 'actions'];
   dataSource = new MatTableDataSource<PoResponse>();
 
   loading = signal(false);
@@ -64,13 +67,15 @@ export class PurchaseOrder implements OnInit {
 
   search = new FormControl('', [Validators.maxLength(100)]);
   statusFilter = signal('');
+  selectedWarehouseIds = signal<number[]>([]);
 
   pageSize = signal(10);
   pageIndex = signal(0);
   sortBy = signal('createdAt');
   sortDirection = signal('desc');
 
-  statusOptions = ['Draft', 'Submitted', 'Approved','PartiallyReceived', 'FullyReceived', 'Rejected', 'Cancelled'];
+  statusOptions = ['Submitted', 'Approved', 'PartiallyReceived', 'FullyReceived', 'Rejected', 'Cancelled'];
+  allWarehouses = signal<WarehouseDropdown[]>([]);
 
   ngOnInit(): void {
     this.search.valueChanges.pipe(
@@ -82,6 +87,7 @@ export class PurchaseOrder implements OnInit {
       this.loadData();
     });
 
+    this.loadWarehouses();
     this.loadData();
   }
 
@@ -91,11 +97,22 @@ export class PurchaseOrder implements OnInit {
     return '';
   }
 
+  loadWarehouses(): void {
+    this.warehouseService.getWarehouses({ pageNumber: 1, pageSize: 100, sortDirection: 'asc' }, { Status: 'Active' }).subscribe({
+      next: res => {
+        if (res.isSuccess && res.data) {
+          this.allWarehouses.set(res.data.items.map(w => ({ id: w.id, name: w.name })));
+        }
+      }
+    });
+  }
+
   loadData(): void {
     this.loading.set(true);
 
     const filters: Record<string, string> = {};
     if (this.statusFilter()) filters['Status'] = this.statusFilter();
+    if (this.selectedWarehouseIds().length > 0) filters['WarehouseId'] = this.selectedWarehouseIds().join(',');
 
     this.service.getPos(
       {
@@ -122,8 +139,15 @@ export class PurchaseOrder implements OnInit {
     this.loadData();
   }
 
+  onWarehouseFilter(selectedIds: number[]): void {
+    this.selectedWarehouseIds.set(selectedIds);
+    this.pageIndex.set(0);
+    this.loadData();
+  }
+
   clearFilters(): void {
     this.statusFilter.set('');
+    this.selectedWarehouseIds.set([]);
     this.pageIndex.set(0);
     if (this.search.value !== '') {
       this.search.setValue('');
@@ -145,53 +169,8 @@ export class PurchaseOrder implements OnInit {
     this.loadData();
   }
 
-  openCreateDialog(): void {
-    const ref = this.dialogSvc.open(
-      { title: 'Create Purchase Order' },
-      PoFormDialog,
-    );
-    ref.afterClosed().subscribe(result => {
-      if (result) this.loadData();
-    });
-  }
-
-  openEditDialog(po: PoResponse): void {
-    const ref = this.dialogSvc.open(
-      { title: 'Edit Purchase Order' },
-      PoFormDialog,
-      { po },
-    );
-    ref.afterClosed().subscribe(result => {
-      if (result) this.loadData();
-    });
-  }
-
   goToItems(po: PoResponse): void {
-    this.router.navigate(['/manager/purchase-order', po.id, 'items']);
-  }
-
-  submitPo(po: PoResponse): void {
-    this.dialog.open(ConfirmDialog, {
-      width: '420px',
-      data: {
-        title: 'Submit Purchase Order',
-        message: `Submit "${po.poNumber}" for approval?`,
-        confirmText: 'Submit',
-      }
-    }).afterClosed().subscribe(confirm => {
-      if (!confirm) return;
-
-      let status : PoStatus = PO_STATUS.submit as PoStatus;
-
-      this.service.updatePoStatus(po.id,{status}).subscribe({
-        next: res => {
-          if (res.isSuccess) {
-            this.toast.success(res.data ?? 'Purchase order submitted for approval.');
-            this.loadData();
-          }
-        }
-      });
-    });
+    this.router.navigate(['/admin/purchase-orders', po.id, 'items']);
   }
 
   approvePo(po: PoResponse): void {
@@ -199,13 +178,14 @@ export class PurchaseOrder implements OnInit {
       width: '420px',
       data: {
         title: 'Approve Purchase Order',
-        message: `Approve "${po.poNumber}" from ${po.supplierName}?`,
+        message: `Approve "${po.poNumber}" from ${po.supplierName} for ${po.warehouseName}?`,
         confirmText: 'Approve',
       }
     }).afterClosed().subscribe(confirm => {
       if (!confirm) return;
 
       let status : PoStatus = PO_STATUS.approve as PoStatus;
+      
       this.service.updatePoStatus(po.id,{status}).subscribe({
         next: res => {
           if (res.isSuccess) {
@@ -218,7 +198,7 @@ export class PurchaseOrder implements OnInit {
   }
 
   rejectPo(po: PoResponse): void {
-    const ref = this.dialogSvc.open(
+    const ref = this.dialogService.open(
       { title: 'Reject Purchase Order' },
       PoRejectDialog,
       { poId: po.id, poNumber: po.poNumber },
@@ -228,34 +208,8 @@ export class PurchaseOrder implements OnInit {
     });
   }
 
-  cancelPo(po: PoResponse): void {
-    this.dialog.open(ConfirmDialog, {
-      width: '420px',
-      data: {
-        title: 'Cancel Purchase Order',
-        message: `Are you sure you want to cancel "${po.poNumber}"? `,
-        confirmText: 'Cancel Order',
-      }
-    }).afterClosed().subscribe(confirm => {
-      if (!confirm) return;
-
-      let status : PoStatus = PO_STATUS.cancel as PoStatus;
-
-      this.service.updatePoStatus(po.id,{status}).subscribe({
-        next: res => {
-          if (res.isSuccess) {
-            this.toast.success(res.data ?? 'Purchase order cancelled.');
-            this.loadData();
-          }
-        }
-      });
-    });
-  }
-
   hasMenuActions(po: PoResponse): boolean {
-    if (po.canEdit) return true;
-    if (po.status === 'Submitted') return true;
-    return false;
+    return po.status === 'Submitted' && po.canApprove;
   }
 
   statusClass(status: string): string {

@@ -11,6 +11,7 @@ const ADMIN_NAV: NavItem[] = [
   { label: 'Bins', icon: 'inbox', route: '/admin/bins' },
   { label: 'Product Category', icon: 'category', route: '/admin/product-category' },
   { label: 'Products', icon: 'inventory_2', route: '/admin/products' },
+  { label: 'Purchase Orders', icon: 'receipt', route: '/admin/purchase-orders' },
   { label: 'Audit Logs', icon: 'receipt_long', route: '/admin/audit-logs' },
 ];
 

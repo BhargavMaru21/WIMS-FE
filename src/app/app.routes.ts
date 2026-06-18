@@ -98,6 +98,20 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'purchase-orders',
+        loadComponent: () =>
+          import('./features/admin/purchase-order-review/purchase-order-review.js').then(
+            (m) => m.PurchaseOrderReview,
+          ),
+      },
+      {
+        path: 'purchase-orders/:id/items',
+        loadComponent: () =>
+          import('./features/manager/purchase-order-item/purchase-order-item.js').then(
+            (m) => m.PurchaseOrderItem,
+          ),
+      },
+      {
         path: 'profile',
         loadComponent: () =>
           import('./features/profile/profile.js').then((m) => m.ProfileComponent),

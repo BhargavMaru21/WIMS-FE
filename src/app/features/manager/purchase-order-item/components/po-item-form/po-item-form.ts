@@ -22,12 +22,7 @@ export class PoItemForm implements OnInit {
   private readonly svc = inject(PurchaseOrderService);
   private readonly toast = inject(ToastService);
   readonly dialogRef = inject(MatDialogRef<PoItemForm>);
-  readonly data: {
-    config: DialogConfig;
-    poId: number;
-    item?: PoItemResponse;
-    products: ProductDropdown[];
-  } = inject(MAT_DIALOG_DATA);
+  readonly data: {config: DialogConfig;poId: number;item?: PoItemResponse;products: ProductDropdown[]} = inject(MAT_DIALOG_DATA);
 
   readonly loading = signal(false);
   readonly isEdit = signal(false);

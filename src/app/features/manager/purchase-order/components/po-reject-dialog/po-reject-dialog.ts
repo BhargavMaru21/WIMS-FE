@@ -53,7 +53,7 @@ export class PoRejectDialog {
       .subscribe({
         next: res => {
           if (res.isSuccess) {
-            this.toast.success('Purchase order rejected.');
+            this.toast.success(res.data ?? 'Purchase order rejected.');
             this.dialogRef.close(true)
           }
         }
