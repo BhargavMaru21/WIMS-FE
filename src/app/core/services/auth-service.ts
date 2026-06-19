@@ -163,7 +163,7 @@ export class AuthService {
       case 'WarehouseManager':
         return '/manager/purchase-order';
       case 'StockKeeper':
-        return '/success';
+        return '/stock-keeper/goods-receipt';
       default:
         return '/auth/login';
     }
