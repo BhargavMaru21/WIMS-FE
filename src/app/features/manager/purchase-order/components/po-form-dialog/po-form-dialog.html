@@ -1,4 +1,4 @@
-<app-dialog [loading]="loading()" [submitDisabled]="form.invalid" (submitted)="onSubmit()">
+<app-dialog [loading]="loading()" [submitDisabled]="!isFormReady" (submitted)="onSubmit()">
   <form [formGroup]="form" class="dialog-form">
 
     <app-input class="mb-3" formControlName="supplierName" label="Supplier Name" placeholder="Enter supplier name"
@@ -18,46 +18,81 @@
       }
     </mat-form-field>
 
-    <app-input formControlName="notes" label="Notes" placeholder="Additional notes (optional)"
+    <app-input class="mb-3" formControlName="notes" label="Notes" placeholder="Additional notes (optional)"
       [customErrorMessage]="getError('notes')" />
-  </form>
-  @if(!isEdit())
-  {
-  <div class="d-flex flex-column gap-2">
-    <div class="my-3 fs-6">Add Items :</div>
 
-    @for(item of selectedItems ; track $index){
-    <div class="d-flex flex-row gap-2">
-      <mat-form-field appearance="outline" class="mb-3 w-100" subscriptSizing="dynamic">
-        <mat-label>Product</mat-label>
-        <mat-select [(ngModel)]="item.productId" (selectionChange)="onSelectChange($event.value)">
+  </form>
+
+  @if (!isEdit()) {
+  <div class="mt-2 d-flex flex-column gap-2">
+
+    <div class="d-flex align-items-center justify-content-between mt-1">
+      <span class="items-title">Items</span>
+      <button mat-stroked-button color="primary" type="button" (click)="addRow()">
+        <mat-icon>add</mat-icon> Add Item
+      </button>
+    </div>
+
+    <div class="item-row item-row-header">
+      <span>Product</span>
+      <span>Qty</span>
+      <span>Unit Price</span>
+      <span>Line Total</span>
+      <span></span>
+    </div>
+
+    @for (row of rows; track $index) {
+    <div class="item-row" [class.row-error]="rowError(row, $index)">
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-select [(ngModel)]="row.productId" (ngModelChange)="row.touched = true">
+          <mat-option [value]="0" disabled>Select product</mat-option>
           @for (p of allProducts(); track p.id) {
-          <mat-option [value]="p.id">{{ p.name }} (₹{{p.unitPrice | number: '1.2-2'}})</mat-option>
+          <mat-option [value]="p.id" [disabled]="isDuplicateProduct(p.id, $index)">
+            {{ p.name }}
+          </mat-option>
           }
         </mat-select>
-        @if (form.get('productId')?.invalid && form.get('productId')?.touched) {
-        <mat-error>{{ getError('productId') }}</mat-error>
-        }
       </mat-form-field>
 
-      <div class="d-flex gap-2">
-        <app-input label="Ordered Quantity" [(ngModel)]="item.orderedQty" placeholder="0" type="number" [min]="0.01"
-        [step]="0.01" [customErrorMessage]="getError('orderedQty')"  />
-         <div class="linetotal">{{getLineTotal(item)}}</div>
-      </div>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <input matInput type="number" [(ngModel)]="row.orderedQty" (ngModelChange)="row.touched = true" [min]="0.01"
+          step="0.01" placeholder="0" />
+      </mat-form-field>
 
+      <span class="price-display">
+        @if (getProduct(row.productId); as p) {
+        ₹{{ p.unitPrice | number:'1.2-2' }}
+        } @else {
+        —
+        }
+      </span>
 
-      <button mat-icon-button (click)="AddNewRow()" class="">
-        <mat-icon>add</mat-icon>
-      </button>
-      <button mat-icon-button (click)="DeleteRow($index)" matTooltip="Delete Item">
+      <span class="total-display" [class.has-value]="getLineTotal(row) > 0">
+        @if (getLineTotal(row) > 0) {
+        ₹{{ getLineTotal(row) | number:'1.2-2' }}
+        } @else {
+        —
+        }
+      </span>
+
+      <button mat-icon-button color="warn" (click)="deleteRow($index)" matTooltip="Remove item">
         <mat-icon>delete</mat-icon>
       </button>
 
     </div>
 
+    @if (rowError(row, $index)) {
+    <div class="row-error-msg">{{ rowError(row, $index) }}</div>
     }
-    <div class="fs-6 fw-bold">Total Amount : <span>{{getGrandTotal()}}</span></div>
+    }
+
+    <div class="grand-total">
+      <span class="grand-total-label">Total Amount</span>
+      <span class="grand-total-value">₹{{ getGrandTotal() | number:'1.2-2' }}</span>
+    </div>
+
   </div>
   }
+
 </app-dialog>

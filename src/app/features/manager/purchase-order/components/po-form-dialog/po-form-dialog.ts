@@ -1,28 +1,27 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { provideNativeDateAdapter, MatOption } from '@angular/material/core';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { provideNativeDateAdapter } from '@angular/material/core';
 import { finalize } from 'rxjs';
-import { PurchaseOrderService } from '../../services/po-service';
-import { PoCreateRequest, PoItemCreateRequest, PoResponse, ProductDropdown } from '../../models/po-models';
 import { InputComponent } from '../../../../../shared/components/input/input';
 import { DialogComponent, DialogConfig } from '../../../../../shared/components/dialog/dialog';
 import { ToastService } from '../../../../../core/services/toast-service';
-import { MatIcon, MatIconModule } from "@angular/material/icon";
+import { PurchaseOrderService } from '../../services/po-service';
+import { PoResponse, ProductDropdown } from '../../models/po-models';
 import { ProductService } from '../../../../admin/product-management/services/product-service';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-
-interface PoItemCreateDemoRequest {
+interface ItemRow {
   productId: number;
   orderedQty: number;
-  lineTotal?: number
+  touched: boolean;
 }
 
 @Component({
@@ -31,18 +30,20 @@ interface PoItemCreateDemoRequest {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     MatDatepickerModule,
     MatFormFieldModule,
     MatInputModule,
-    InputComponent,
-    DialogComponent,
-    MatIconModule,
     MatSelectModule,
     MatButtonModule,
-    FormsModule 
-],
+    MatIconModule,
+    MatTooltipModule,
+    InputComponent,
+    DialogComponent,
+  ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './po-form-dialog.html',
+  styleUrl: './po-form-dialog.scss',
 })
 export class PoFormDialog implements OnInit {
   private readonly fb = inject(FormBuilder);
@@ -55,23 +56,27 @@ export class PoFormDialog implements OnInit {
   loading = signal(false);
   isEdit = signal(false);
   allProducts = signal<ProductDropdown[]>([]);
-  productPrice = signal(0);
-  qnt = signal(0);
-  quantity =  new FormControl('')
 
-  selectedItems: PoItemCreateDemoRequest[] = [
-    { productId: 0, orderedQty: 1 } 
-  ];
+  rows: ItemRow[] = [{ productId: 0, orderedQty: 1, touched: false }];
 
-  minDate = new Date(Date.now() + 86400000); // tomorrow
-  maxDate = new Date(2026, 11, 31); 
+  minDate = new Date(Date.now() + 86400000);
+  maxDate = new Date(2026, 11, 31);
 
   form = this.fb.group({
-    supplierName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200), Validators.pattern(/^[a-zA-Z\s]+$/)]],
+    supplierName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200), Validators.pattern(/^[a-zA-Z\s]+$/),]],
     supplierContact: ['', [Validators.pattern(/^(?:\+91[\-\s]?)?[6-9]\d{9}$/)]],
     expectedDelivery: [null as Date | null, Validators.required],
     notes: ['', [Validators.maxLength(1000)]],
   });
+
+  get isFormReady(): boolean {
+    if (this.form.invalid) return false;
+    if (!this.isEdit()) {
+      const validRows = this.rows.filter(r => r.productId > 0 && r.orderedQty > 0);
+      if (validRows.length === 0) return false;
+    }
+    return true;
+  }
 
   getError(field: string): string {
     const ctrl = this.form.get(field);
@@ -113,32 +118,43 @@ export class PoFormDialog implements OnInit {
     });
   }
 
-  getProductPrice(id : number):number{
-    let product = this.allProducts().find(x => x.id === id)
-    return product?.unitPrice ?? 0;
+
+  getProduct(productId: number): ProductDropdown | undefined {
+    return this.allProducts().find(p => p.id === productId);
   }
 
-  getLineTotal(item : PoItemCreateRequest) : number{
-    return this.getProductPrice(item.productId) * item.orderedQty
+  getLineTotal(row: ItemRow): number {
+    const product = this.getProduct(row.productId);
+    if (!product || row.orderedQty <= 0) return 0;
+    return product.unitPrice * row.orderedQty;
   }
 
-  getGrandTotal(){
-    return this.selectedItems.reduce((sum,item) => sum + this.getLineTotal(item) , 0)
-  }
-  onSelectChange(value:number){
-    let product = this.allProducts().find(x => x.id === value)
-    this.productPrice.set(product!.unitPrice)
+  getGrandTotal(): number {
+    return this.rows.reduce((sum, row) => sum + this.getLineTotal(row), 0);
   }
 
-  AddNewRow(){
-    this.selectedItems.push({ productId: 0, orderedQty: 1 });
+  isDuplicateProduct(productId: number, currentIndex: number): boolean {
+    if (productId === 0) return false;
+    return this.rows.some((r, i) => i !== currentIndex && r.productId === productId);
   }
 
-  DeleteRow(index: number){
-    console.log(index);
-    if(this.selectedItems.length == 1 ) 
-        return this.toast.error("At Least One Item required") 
-    this.selectedItems.splice(index, 1);
+  rowError(row: ItemRow, index: number): string {
+    if (!row.touched) return '';
+    if (row.productId === 0) return 'Please select a product.';
+    if (row.orderedQty <= 0) return 'Quantity must be greater than zero.';
+    return '';
+  }
+
+  addRow(): void {
+    this.rows.push({ productId: 0, orderedQty: 1, touched: false });
+  }
+
+  deleteRow(index: number): void {
+    if (this.rows.length === 1) {
+      this.toast.error('At least one item is required.');
+      return;
+    }
+    this.rows.splice(index, 1);
   }
 
 
@@ -148,14 +164,37 @@ export class PoFormDialog implements OnInit {
       return;
     }
 
-    const validSelections = this.selectedItems.filter(item => item.productId !== 0);
-    if(validSelections.length == 0)
-        return this.toast.error("At least one product item need to select");
+    if (!this.isEdit()) {
+      this.rows.forEach(r => r.touched = true);
+
+      const validRows = this.rows.filter(r => r.productId > 0 && r.orderedQty > 0);
+
+      if (validRows.length === 0) {
+        this.toast.error('At least one item with a valid product and quantity is required.');
+        return;
+      }
+
+      const hasErrors = this.rows.some((r, i) =>
+        r.productId === 0 ||
+        r.orderedQty <= 0 ||
+        this.isDuplicateProduct(r.productId, i)
+      );
+
+      if (hasErrors) {
+        this.toast.error('Please fix item errors before saving.');
+        return;
+      }
+    }
 
     this.loading.set(true);
     const raw = this.form.getRawValue();
     
     const expectedDelivery = this.toDateOnlyString(raw.expectedDelivery!);
+
+    const orderItems = this.rows.map(r => ({
+      productId: r.productId,
+      orderedQty: r.orderedQty,
+    }))
 
     const request$ = this.isEdit()
       ? this.service.updatePo(this.data.po!.id, {
@@ -169,7 +208,7 @@ export class PoFormDialog implements OnInit {
         supplierContact: raw.supplierContact || undefined,
         expectedDelivery,
         notes: raw.notes || undefined,
-        itemList : validSelections
+        itemList: orderItems,
       });
 
     request$.pipe(finalize(() => this.loading.set(false))).subscribe({

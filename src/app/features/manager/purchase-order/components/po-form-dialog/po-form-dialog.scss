@@ -1,14 +1,64 @@
-.qtyInput{
-    width: 10px;
+.items-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
 }
 
-.linetotal{
-    background-color: rgb(236, 241, 241);
-    padding: 5px 10px;
-    border-radius: 5px;
-    width: 50px;
+.item-row {
+    display: grid;
+    grid-template-columns: 5fr 2fr 2.5fr 2.5fr 1fr;
+    gap: 8px;
+    align-items: center;
 }
 
-.mat-mdc-text-field-wrapper{
-    width: 0;
+.item-row-header {
+    padding: 0 4px;
+    margin-bottom: 2px;
+}
+
+.price-display {
+    font-size: 14px;
+    color: #64748b;
+    padding-left: 4px;
+}
+
+.total-display {
+    font-size: 14px;
+    font-weight: 500;
+    color: #94a3b8;
+    padding-left: 4px;
+
+    &.has-value {
+        color: #0f172a;
+        font-weight: 600;
+    }
+}
+
+.row-error-msg {
+    font-size: 12px;
+    color: #dc2626;
+    padding: 0 4px 4px;
+    grid-column: 1 / -1;
+}
+
+.grand-total {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    padding: 12px 4px 4px;
+    border-top: 1px solid #e2e8f0;
+    margin-top: 6px;
+}
+
+.grand-total-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.grand-total-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
 }

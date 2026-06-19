@@ -95,7 +95,7 @@ export class BinFormDialog implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.form.invalid) {
+    if (this.form.invalid || !this.isZoneExists()) {
       this.form.markAllAsTouched();
       return;
     }
