@@ -4,34 +4,17 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { ApiResponse } from '../../../../core/models/api-response';
 import { BinCreateRequest, BinResponse, BinUpdateRequest, PagedResult, QueryParams, StatusUpdateRequest, WarehouseCreateRequest, WarehouseResponse, WarehouseUpdateRequest, ZoneCreateRequest, ZoneDropdown, ZoneResponse, ZoneUpdateRequest } from '../models/warehouse-models';
+import { BuildParams } from '../../../../core/services/build-params';
 
 
 @Injectable({ providedIn: 'root' })
 export class WarehouseManagementService {
   private readonly http = inject(HttpClient);
   private readonly base = environment.baseUrl;
+  private readonly buildParamService = inject(BuildParams);
 
-  private buildParams(qp: QueryParams, filters?: Record<string, string>): HttpParams {
-    let params = new HttpParams();
-
-    if (qp.pageNumber) params = params.set('pageNumber', qp.pageNumber);
-    if (qp.pageSize) params = params.set('pageSize', qp.pageSize);
-    if (qp.search) params = params.set('search', qp.search);
-    if (qp.sortBy) params = params.set('sortBy', qp.sortBy);
-    if (qp.sortDirection) params = params.set('sortDirection', qp.sortDirection);
-
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value) params = params.set(`filters[${key}]`, value);
-      });
-    }
-
-    return params;
-  }
-
-  //warehouse 
   getWarehouses(qp: QueryParams, filters?: Record<string, string>): Observable<ApiResponse<PagedResult<WarehouseResponse>>> {
-    return this.http.get<ApiResponse<PagedResult<WarehouseResponse>>>(`${this.base}/admin/warehouses`, { params: this.buildParams(qp, filters) });
+    return this.http.get<ApiResponse<PagedResult<WarehouseResponse>>>(`${this.base}/admin/warehouses`, { params: this.buildParamService.build(qp, filters) });
   }
 
   createWarehouse(payload: WarehouseCreateRequest): Observable<ApiResponse<WarehouseResponse>> {
@@ -53,7 +36,7 @@ export class WarehouseManagementService {
 
   //zone
   getZones(qp: QueryParams, filters?: Record<string, string>): Observable<ApiResponse<PagedResult<ZoneResponse>>> {
-    return this.http.get<ApiResponse<PagedResult<ZoneResponse>>>(`${this.base}/admin/zones`, { params: this.buildParams(qp, filters) });
+    return this.http.get<ApiResponse<PagedResult<ZoneResponse>>>(`${this.base}/admin/zones`, { params: this.buildParamService.build(qp, filters) });
   }
 
   getZonesDropdown(warehouseId?: number): Observable<ApiResponse<ZoneDropdown[]>> {
@@ -83,7 +66,7 @@ export class WarehouseManagementService {
   getBins(qp: QueryParams, filters?: Record<string, string>): Observable<ApiResponse<PagedResult<BinResponse>>> {
     return this.http.get<ApiResponse<PagedResult<BinResponse>>>(
       `${this.base}/admin/bins`,
-      { params: this.buildParams(qp, filters) }
+      { params: this.buildParamService.build(qp, filters) }
     );
   }
 

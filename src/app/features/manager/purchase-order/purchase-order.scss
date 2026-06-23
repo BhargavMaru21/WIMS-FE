@@ -48,9 +48,9 @@
     color: #92400e;
   }
 
-  &.status-approved
+  &.status-approved,
   &.status-partiallyreceived,
-  &.status-fullyreceived {
+  &.status-fullyreceived{
     background: #dcfce7;
     color: #15803d;
   }

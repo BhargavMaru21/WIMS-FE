@@ -2,7 +2,6 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '../../../../core/models/api-response.js'
-import { PagedResult } from '../../warehouse-management/models/warehouse-models';
 import {
     CreateUserRequest,
     UpdateUserRoleRequest,
@@ -13,29 +12,17 @@ import {
     UserSummaryResponse,
 } from '../models/user-models.js'
 import { environment } from '../../../../../environments/environment';
+import { BuildParams } from '../../../../core/services/build-params.js';
+import { PagedResult, QueryParams } from '../../../../core/models/common-models.js';
 
 @Injectable({ providedIn: 'root' })
 export class UserManagementService {
     private readonly http = inject(HttpClient);
     private readonly base = environment.baseUrl;
+    private readonly buildParamService = inject(BuildParams);
 
-    private buildParams(qp: UserQueryParams, filters?: Record<string, string>): HttpParams {
-        let params = new HttpParams();
-        if (qp.pageNumber) params = params.set('pageNumber', qp.pageNumber);
-        if (qp.pageSize) params = params.set('pageSize', qp.pageSize);
-        if (qp.search) params = params.set('search', qp.search);
-        if (qp.sortBy) params = params.set('sortBy', qp.sortBy);
-        if (qp.sortDirection) params = params.set('sortDirection', qp.sortDirection);
-        if (filters) {
-            Object.entries(filters).forEach(([key, value]) => {
-                if (value) params = params.set(`filters[${key}]`, value);
-            });
-        }
-        return params;
-    }
-
-    getUsers(qp: UserQueryParams, filters?: Record<string, string>): Observable<ApiResponse<PagedResult<UserSummaryResponse>>> {
-        return this.http.get<ApiResponse<PagedResult<UserSummaryResponse>>>(`${this.base}/admin/users`, { params: this.buildParams(qp, filters) });
+    getUsers(qp: QueryParams, filters?: Record<string, string>): Observable<ApiResponse<PagedResult<UserSummaryResponse>>> {
+        return this.http.get<ApiResponse<PagedResult<UserSummaryResponse>>>(`${this.base}/admin/users`, { params: this.buildParamService.build(qp, filters) });
     }
 
     getUserById(id: number): Observable<ApiResponse<UserResponse>> {

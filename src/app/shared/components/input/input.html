@@ -3,7 +3,7 @@
   [appearance]="appearance"
   [subscriptSizing]="subscriptSizing"
 >
-  <mat-label>{{ label }}</mat-label>
+ <mat-label>{{ label }}@if (isRequired) {<span class="required-asterisk"> *</span>}</mat-label>
 
   @if (prefixIcon || prefixIconPath) {
     <span matPrefix class="input-prefix">

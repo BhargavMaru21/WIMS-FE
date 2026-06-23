@@ -15,7 +15,7 @@ import { InputComponent } from '../../../../../shared/components/input/input';
 import { DialogComponent, DialogConfig } from '../../../../../shared/components/dialog/dialog';
 import { ToastService } from '../../../../../core/services/toast-service';
 import { PurchaseOrderService } from '../../services/po-service';
-import { PoResponse, ProductDropdown } from '../../models/po-models';
+import { PoResponse, ProductDropdown, ProductDropdownWithUom } from '../../models/po-models';
 import { ProductService } from '../../../../admin/product-management/services/product-service';
 
 interface ItemRow {
@@ -55,7 +55,7 @@ export class PoFormDialog implements OnInit {
 
   loading = signal(false);
   isEdit = signal(false);
-  allProducts = signal<ProductDropdown[]>([]);
+  allProducts = signal<ProductDropdownWithUom[]>([]);
 
   rows: ItemRow[] = [{ productId: 0, orderedQty: 1, touched: false }];
 
@@ -111,7 +111,9 @@ export class PoFormDialog implements OnInit {
           this.allProducts.set(res.data.items.map(p => ({
             id: p.id,
             name: p.name,
-            unitPrice: p.unitPrice
+            unitPrice: p.unitPrice,
+            uomName : p.uomName,
+            uomAbbreviation : p.uomAbbreviation
           })));
         }
       }
@@ -119,7 +121,7 @@ export class PoFormDialog implements OnInit {
   }
 
 
-  getProduct(productId: number): ProductDropdown | undefined {
+  getProduct(productId: number): ProductDropdownWithUom | undefined {
     return this.allProducts().find(p => p.id === productId);
   }
 

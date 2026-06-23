@@ -85,6 +85,13 @@ export interface PoItemUpdateRequest {
     orderedQty?: number;
 }
 
+export interface ProductDropdownWithUom {
+    id: number;
+    name: string;
+    unitPrice: number;
+    uomName: string;
+    uomAbbreviation: string;
+}
 export interface ProductDropdown {
     id: number;
     name: string;

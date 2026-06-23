@@ -36,6 +36,7 @@
     <div class="item-row item-row-header">
       <span>Product</span>
       <span>Qty</span>
+      <span>Unit</span>
       <span>Unit Price</span>
       <span>Line Total</span>
       <span></span>
@@ -59,6 +60,14 @@
         <input matInput type="number" [(ngModel)]="row.orderedQty" (ngModelChange)="row.touched = true" [min]="0.01"
           step="0.01" placeholder="0" />
       </mat-form-field>
+
+      <span class="unit">
+        @if (getProduct(row.productId); as p) {
+        {{ p.uomName }}
+        } @else {
+        —
+        }
+      </span>
 
       <span class="price-display">
         @if (getProduct(row.productId); as p) {

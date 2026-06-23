@@ -6,7 +6,7 @@
 
 .item-row {
     display: grid;
-    grid-template-columns: 5fr 2fr 2.5fr 2.5fr 1fr;
+    grid-template-columns: 5fr 2fr 1.5fr 2fr 2fr 0.5fr;
     gap: 8px;
     align-items: center;
 }
@@ -20,6 +20,12 @@
     font-size: 14px;
     color: #64748b;
     padding-left: 4px;
+}
+
+.unit{
+    font-size: 14px;
+    font-weight: 500;
+    
 }
 
 .total-display {

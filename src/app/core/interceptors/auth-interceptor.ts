@@ -13,6 +13,8 @@ const PUBLIC_URLS = [
   '/auth/logout',
 ];
 
+export const SILENT_REQUEST_HEADER = 'X-Silent-Request';
+
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);

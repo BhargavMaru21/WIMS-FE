@@ -4,33 +4,16 @@ import { environment } from "../../../../../environments/environment";
 import { PagedResult, ProductCategoryCreateRequest, ProductCategoryDropdownResponse, ProductCategoryResponse, ProductCategoryStatusUpdateRequest, ProductCategoryUpdateRequest, QueryParams } from "../models/product-category-models";
 import { Observable } from "rxjs";
 import { ApiResponse } from "../../../../core/models/api-response";
+import { BuildParams } from "../../../../core/services/build-params";
 
 @Injectable({ providedIn: 'root' })
 export class ProductCategoryService {
     private readonly http = inject(HttpClient);
     private readonly base = environment.baseUrl;
+    private readonly buildParamService = inject(BuildParams);
 
-    private buildParams(qp: QueryParams, filters?: Record<string, string>): HttpParams {
-        let params = new HttpParams();
-
-        if (qp.pageNumber) params = params.set('pageNumber', qp.pageNumber);
-        if (qp.pageSize) params = params.set('pageSize', qp.pageSize);
-        if (qp.search) params = params.set('search', qp.search);
-        if (qp.sortBy) params = params.set('sortBy', qp.sortBy);
-        if (qp.sortDirection) params = params.set('sortDirection', qp.sortDirection);
-
-        if (filters) {
-            Object.entries(filters).forEach(([key, value]) => {
-                if (value) params = params.set(`filters[${key}]`, value);
-            });
-        }
-
-        return params;
-    }
-
-    //product category 
     getProductCategories(qp: QueryParams, filters?: Record<string, string>): Observable<ApiResponse<PagedResult<ProductCategoryResponse>>> {
-        return this.http.get<ApiResponse<PagedResult<ProductCategoryResponse>>>(`${this.base}/productCategory`, { params: this.buildParams(qp, filters) });
+        return this.http.get<ApiResponse<PagedResult<ProductCategoryResponse>>>(`${this.base}/productCategory`, { params: this.buildParamService.build(qp, filters) });
     }
 
     getProductCategoryDropdown(): Observable<ApiResponse<ProductCategoryDropdownResponse[]>>{

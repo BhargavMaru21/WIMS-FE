@@ -11,32 +11,18 @@ import {
   ProductUpdateRequest,
   UomResponse,
 } from '../models/product-models';
+import { BuildParams } from '../../../../core/services/build-params';
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
   private readonly http = inject(HttpClient);
   private readonly base = environment.baseUrl;
-
-  private buildParams(qp: QueryParams, filters?: Record<string, string>): HttpParams {
-    let params = new HttpParams();
-    if (qp.pageNumber) params = params.set('pageNumber', qp.pageNumber);
-    if (qp.pageSize) params = params.set('pageSize', qp.pageSize);
-    if (qp.search) params = params.set('search', qp.search);
-    if (qp.sortBy) params = params.set('sortBy', qp.sortBy);
-    if (qp.sortDirection) params = params.set('sortDirection', qp.sortDirection);
-
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value) params = params.set(`filters[${key}]`, value);
-      });
-    }
-    return params;
-  }
+  private readonly buildParamService = inject(BuildParams);
 
   getProducts(qp: QueryParams, filters?: Record<string, string>): Observable<ApiResponse<PagedResult<ProductResponse>>> {
     return this.http.get<ApiResponse<PagedResult<ProductResponse>>>(
       `${this.base}/product`,
-      { params: this.buildParams(qp, filters) }
+      { params: this.buildParamService.build(qp, filters) }
     );
   }
 

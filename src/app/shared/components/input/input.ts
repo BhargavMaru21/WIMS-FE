@@ -69,6 +69,13 @@ export class InputComponent implements ControlValueAccessor, AfterViewInit, OnDe
 
   @ViewChild(MatInput) matInput!: MatInput;
 
+  get isRequired(): boolean {
+    const control = this.ngControl?.control;
+    if (!control) return false;
+    const validator = control.validator?.({} as any);
+    return !!(validator && validator['required']);
+  }
+
   // Internal state 
   value: InputValue = '';
   disabled = false;
