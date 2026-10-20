@@ -149,6 +149,8 @@ export class PurchaseOrder implements OnInit {
     const ref = this.dialogSvc.open(
       { title: 'Create Purchase Order' },
       PoFormDialog,
+      {},
+      "700px"
     );
     ref.afterClosed().subscribe(result => {
       if (result) this.loadData();

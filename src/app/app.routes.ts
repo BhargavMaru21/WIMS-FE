@@ -41,7 +41,7 @@ export const routes: Routes = [
         path: '',
         redirectTo: 'login',
         pathMatch: 'full',
-      },
+      }
     ],
   },
 
@@ -120,7 +120,7 @@ export const routes: Routes = [
         path: '',
         redirectTo: 'users',
         pathMatch: 'full',
-      },
+      }
     ],
   },
 
@@ -158,7 +158,7 @@ export const routes: Routes = [
         path: '',
         redirectTo: 'purchase-order',
         pathMatch: 'full',
-      },
+      }
     ],
   },
 
@@ -172,7 +172,23 @@ export const routes: Routes = [
         (m) => m.StockKeeperLayoutComponent,
       ),
     children: [
-
+      {
+        path: 'goods-receipt',
+        loadComponent: () =>
+          import('./features/stock-keeper/goods-receipt/goods-receipt.js').then(
+            (m) => m.GoodsReceipt
+          )
+      },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./features/profile/profile.js').then((m) => m.ProfileComponent),
+      },
+      {
+        path: '',
+        redirectTo: 'goods-receipt',
+        pathMatch: 'full',
+      }
     ],
   },
 

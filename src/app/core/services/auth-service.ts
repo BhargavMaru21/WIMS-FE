@@ -1,5 +1,5 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpRequest } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
@@ -18,6 +18,7 @@ import {
   UserProfileResponse,
   UserRole,
 } from '../models/auth-models';
+import { SILENT_REQUEST_HEADER } from '../interceptors/auth-interceptor';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -38,28 +39,24 @@ export class AuthService {
     }
   });
 
-  readonly role = computed<UserRole | null>(() => (this.decodedJwt()?.['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] as UserRole) ?? null,
+  readonly role = computed<UserRole | null>(
+    () =>
+      (this.decodedJwt()?.['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] as UserRole) ?? null,
   );
 
   readonly userId = computed<string | null>(
     () =>
-      this.decodedJwt()?.[
-      'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'
-      ] ?? null,
+      this.decodedJwt()?.['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] ?? null,
   );
 
   readonly userName = computed<string | null>(
     () =>
-      this.decodedJwt()?.[
-      'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'
-      ] ?? null,
+      this.decodedJwt()?.['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] ?? null,
   );
 
   readonly userEmail = computed<string | null>(
     () =>
-      this.decodedJwt()?.[
-      'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'
-      ] ?? null,
+      this.decodedJwt()?.['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'] ?? null,
   );
 
   readonly warehouseId = computed<number | null>(
@@ -89,9 +86,9 @@ export class AuthService {
     this.accessToken.set(token);
   }
 
-
   login(data: LoginRequest): Observable<ApiResponse<AuthResponse>> {
-    return this.http.post<ApiResponse<AuthResponse>>(`${this.baseUrl}/auth/login`, data)
+    return this.http
+      .post<ApiResponse<AuthResponse>>(`${this.baseUrl}/auth/login`, data)
       .pipe(
         tap((res) => {
           if (res.isSuccess && res.data?.accessToken) {
@@ -114,7 +111,9 @@ export class AuthService {
   }
 
   refreshToken(): Observable<ApiResponse<AuthResponse>> {
-    return this.http.post<ApiResponse<AuthResponse>>(`${this.baseUrl}/auth/refresh-token`, {})
+    const headers = { [SILENT_REQUEST_HEADER]: 'true' };
+
+    return this.http.post<ApiResponse<AuthResponse>>(`${this.baseUrl}/auth/refresh-token`,{},{ headers, withCredentials: true })
       .pipe(
         tap((res) => {
           if (res.isSuccess && res.data?.accessToken) {
@@ -140,19 +139,15 @@ export class AuthService {
           this.router.navigate(['/auth/login']);
         }
       },
-      error: () => {
-
-      }
+      error: () => {},
     });
   }
 
   getProfile(): Observable<ApiResponse<UserProfileResponse>> {
     return this.http.get<ApiResponse<UserProfileResponse>>(`${this.baseUrl}/profile`);
   }
- 
-  updateProfile(
-    data: UpdateProfileRequest,
-  ): Observable<ApiResponse<UserProfileResponse>> {
+
+  updateProfile(data: UpdateProfileRequest): Observable<ApiResponse<UserProfileResponse>> {
     return this.http.patch<ApiResponse<UserProfileResponse>>(`${this.baseUrl}/profile`, data);
   }
 
@@ -163,19 +158,19 @@ export class AuthService {
       case 'WarehouseManager':
         return '/manager/purchase-order';
       case 'StockKeeper':
-        return '/success';
+        return '/stock-keeper/goods-receipt';
       default:
         return '/auth/login';
     }
   }
 
-  // App initializer
   initializeAuth(): Promise<void> {
     return new Promise((resolve) => {
       if (this.accessToken()) {
         resolve();
         return;
       }
+      // refreshToken() always sends X-Silent-Request — no toast on failure
       this.refreshToken().subscribe({
         next: () => resolve(),
         error: () => resolve(),

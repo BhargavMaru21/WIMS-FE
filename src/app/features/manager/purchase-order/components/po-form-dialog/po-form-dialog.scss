@@ -1,0 +1,70 @@
+.items-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.item-row {
+    display: grid;
+    grid-template-columns: 5fr 2fr 1.5fr 2fr 2fr 0.5fr;
+    gap: 8px;
+    align-items: center;
+}
+
+.item-row-header {
+    padding: 0 4px;
+    margin-bottom: 2px;
+}
+
+.price-display {
+    font-size: 14px;
+    color: #64748b;
+    padding-left: 4px;
+}
+
+.unit{
+    font-size: 14px;
+    font-weight: 500;
+    
+}
+
+.total-display {
+    font-size: 14px;
+    font-weight: 500;
+    color: #94a3b8;
+    padding-left: 4px;
+
+    &.has-value {
+        color: #0f172a;
+        font-weight: 600;
+    }
+}
+
+.row-error-msg {
+    font-size: 12px;
+    color: #dc2626;
+    padding: 0 4px 4px;
+    grid-column: 1 / -1;
+}
+
+.grand-total {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    padding: 12px 4px 4px;
+    border-top: 1px solid #e2e8f0;
+    margin-top: 6px;
+}
+
+.grand-total-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.grand-total-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+}

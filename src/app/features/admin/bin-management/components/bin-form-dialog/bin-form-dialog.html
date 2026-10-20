@@ -1,6 +1,6 @@
 <app-dialog
   [loading]="loading()"
-  [submitDisabled]="form.invalid"
+  [submitDisabled]="form.invalid || !isZoneExists()"
   (submitted)="onSubmit()"
 >
   <form [formGroup]="form">
