@@ -6,7 +6,7 @@ on:
       - "**"
   pull_request:
     branches:
-      - main
+      - master
 
 permissions:
   contents: read
@@ -35,7 +35,7 @@ jobs:
   build-and-push:
     name: Build and Push Docker Image
     needs: build-frontend
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
 
     steps:
