@@ -1,0 +1,40 @@
+<div class="notif-wrapper">
+
+    <button
+      class="notif-trigger"
+      type="button"
+      (click)="toggle()"
+      aria-label="Notifications"
+    >
+      <i class="bi bi-bell"></i>
+      @if (unreadCount > 0) {
+        <span class="notif-badge">{{ unreadCount }}</span>
+      }
+    </button>
+  
+    <!-- Panel -->
+    @if (open()) {
+      <div class="notif-panel" role="menu">
+  
+        <div class="notif-title">Notifications</div>
+  
+        @if (notifications().length === 0) {
+          <div class="notif-empty">No notifications</div>
+        }
+  
+        @for (item of notifications(); track item.id) {
+          <div class="notif-item" [class.notif-unread]="!item.read">
+            @if (!item.read) {
+              <div class="notif-dot"></div>
+            }
+            <div class="notif-body">
+              <p class="notif-item-title">{{ item.title }}</p>
+              <p class="notif-item-desc">{{ item.description }}</p>
+            </div>
+          </div>
+        }
+  
+      </div>
+    }
+  
+  </div>

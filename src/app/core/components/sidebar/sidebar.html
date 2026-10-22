@@ -1,0 +1,15 @@
+<aside class="sidebar d-flex flex-column" [class.collapsed]="collapsed()">
+
+  <nav class="d-flex flex-column gap-1 p-2 flex-grow-1">
+    @for (item of navItems(); track item.route) {
+    <a class="nav-item d-flex align-items-center gap-2 px-2 py-2 rounded-3 text-decoration-none"
+      [routerLink]="item.route" routerLinkActive="active" [matTooltip]="collapsed() ? item.label : ''"
+      matTooltipPosition="right">
+      <mat-icon class="nav-icon flex-shrink-0">{{ item.icon }}</mat-icon>
+      @if (!collapsed()) {
+      <span class="nav-label">{{ item.label }}</span>
+      }
+    </a>
+    }
+  </nav>
+</aside>

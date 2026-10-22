@@ -1,0 +1,19 @@
+<div class="pt-3 ps-3 pe-2">
+    <div class="d-flex align-items-center justify-content-between">
+        <h2 mat-dialog-title class="dialog-title fs-5 fw-bold m-0">{{ data.title }}</h2>
+        <button class="close-btn" (click)="onCancel()">
+            <i class="bi bi-x-lg icon"></i>
+        </button>
+    </div>
+    <mat-dialog-content class="p-0 my-2">
+        <p class="fs-6 m-0">{{ data.message }}</p>
+    </mat-dialog-content>
+    <mat-dialog-actions class="gap-3 pt-2 ">
+        <button (click)="onCancel()" class="btn-cancel">
+            Cancel
+        </button>
+        <button (click)="onConfirm()" class="btn-confirm">
+            {{data.confirmText}}
+        </button>
+    </mat-dialog-actions>
+</div>

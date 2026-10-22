@@ -1,0 +1,27 @@
+<header class="app-header d-flex align-items-center justify-content-between px-3">
+
+  <div class="d-flex align-items-center gap-2">
+    <button class="toggle-btn d-flex align-items-center justify-content-center" (click)="toggleSidebar.emit()"
+      aria-label="Toggle sidebar">
+      <i class="bi bi-list fs-5"></i>
+    </button>
+    <span class="brand-text">WIMS</span>
+  </div>
+
+  <div class="d-flex align-items-center gap-2">
+    <app-notification-dropdown  />
+    <app-dropdown title="My Account" [items]="profileItems" align="right">
+      <div class="user-trigger d-flex align-items-center gap-2 px-2 py-1 rounded-3">
+        <div class="user-avatar d-flex align-items-center justify-content-center rounded-circle flex-shrink-0">
+          {{ initials }}
+        </div>
+        <div class="user-info d-none d-sm-flex flex-column">
+          <span class="user-name">{{ user?.name }}</span>
+          <span class="user-role">{{ user?.role }}</span>
+        </div>
+        <i class="bi bi-chevron-down user-chevron d-none d-sm-block"></i>
+      </div>
+    </app-dropdown>
+  </div>
+
+</header>

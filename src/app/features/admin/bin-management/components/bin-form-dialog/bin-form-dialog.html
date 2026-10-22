@@ -1,0 +1,55 @@
+<app-dialog
+  [loading]="loading()"
+  [submitDisabled]="form.invalid || !isZoneExists()"
+  (submitted)="onSubmit()"
+>
+  <form [formGroup]="form">
+
+    <mat-form-field appearance="outline" class="mb-3 w-100" subscriptSizing="dynamic">
+      <mat-label>Warehouse</mat-label>
+      <mat-select formControlName="warehouseId" (selectionChange)="onWarehouseChange($event.value)">
+        @for (w of warehouses; track w.id) {
+          <mat-option [value]="w.id">{{ w.name }}</mat-option>
+        }
+      </mat-select>
+      @if (form.get('warehouseId')?.invalid && form.get('warehouseId')?.touched) {
+        <mat-error>Warehouse is required</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="mb-3 ">
+      <mat-form-field appearance="outline" class="w-100" subscriptSizing="dynamic">
+        <mat-label>Zone</mat-label>
+        <mat-select formControlName="zoneId">
+          @for (z of filteredZones(); track z.id) {
+            <mat-option [value]="z.id">{{ z.name }}</mat-option>
+          }
+        </mat-select>
+        @if (form.get('zoneId')?.invalid && form.get('zoneId')?.touched) {
+          <mat-error>Zone is required</mat-error>
+        }
+      </mat-form-field>
+      
+      @if(!isZoneExists()){
+        <mat-error class="mt-1 ps-2">No Zone In this warehouse . Please Add Zone.</mat-error>
+      }
+    </div>
+
+    <app-input
+      class="mb-3"
+      formControlName="name"
+      label="Bin Name"
+      placeholder="Enter bin name"
+      [customErrorMessage]="getNameError()"
+    />
+
+    <app-input
+      formControlName="maxCapacity"
+      label="Max Capacity"
+      placeholder="Enter max capacity"
+      type="number"
+      [min]="0"
+    />
+
+  </form>
+</app-dialog>

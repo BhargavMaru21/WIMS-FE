@@ -1,0 +1,42 @@
+<app-dialog
+  [loading]="loading()"
+  [submitDisabled]="form.invalid"
+  (submitted)="onSubmit()"
+>
+  <form [formGroup]="form" class="dialog-form">
+    <app-input
+      class="mb-3"
+      formControlName="name"
+      label="Warehouse Name"
+      placeholder="Enter warehouse name"
+      [customErrorMessage]="getError('name')"
+    />
+    <app-input
+      class="mb-3"
+      formControlName="address"
+      label="Address"
+      placeholder="Enter address"
+      [customErrorMessage]="getError('address')"
+    />
+    <app-input
+      class="mb-3"
+      formControlName="city"
+      label="City"
+      placeholder="Enter city"
+      [customErrorMessage]="getError('city')"
+    />
+    <app-input
+      class="mb-3"
+      formControlName="contactPerson"
+      label="Contact Person"
+      placeholder="Enter contact person name"
+      [customErrorMessage]="getError('contactPerson')"
+    />
+    <app-input
+      formControlName="contactPhone"
+      label="Contact Phone"
+      placeholder="Enter contact phone"
+      [customErrorMessage]="getError('contactPhone')"
+    />
+  </form>
+</app-dialog>

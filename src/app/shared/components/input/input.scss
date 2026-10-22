@@ -1,0 +1,122 @@
+// ── Host ────────────────────────────────────────────────────
+:host {
+    display: block;
+    width: 100%;
+  }
+  
+  .wims-input {
+    width: 100%;
+  
+    --mdc-outlined-text-field-container-shape: 8px;
+  
+    // Label (resting)
+    --mdc-outlined-text-field-label-text-size: 14px;
+    --mdc-outlined-text-field-label-text-color: var(--mat-sys-on-surface-variant);
+  
+    // Label (focused)
+    --mdc-outlined-text-field-focus-label-text-color: var(--mat-sys-primary);
+  
+    // Label (error)
+    --mdc-outlined-text-field-error-label-text-color: var(--mat-sys-error);
+  
+    // Input text
+    --mdc-outlined-text-field-input-text-size: 14px;
+    --mdc-outlined-text-field-input-text-color: var(--mat-sys-on-surface);
+  
+    // Placeholder
+    --mdc-outlined-text-field-input-text-placeholder-color: var(--mat-sys-outline);
+  
+    // Outline colours
+    --mdc-outlined-text-field-outline-color: var(--mat-sys-outline-variant);
+    --mdc-outlined-text-field-hover-outline-color: var(--mat-sys-outline);
+    --mdc-outlined-text-field-focus-outline-color: var(--mat-sys-primary);
+    --mdc-outlined-text-field-error-outline-color: var(--mat-sys-error);
+    --mdc-outlined-text-field-error-hover-outline-color: var(--mat-sys-error);
+    --mdc-outlined-text-field-error-focus-outline-color: var(--mat-sys-error);
+  
+    // Filled variant tokens
+    --mdc-filled-text-field-container-color: var(--mat-sys-surface-variant);
+    --mdc-filled-text-field-container-shape: 8px 8px 0 0;
+    --mdc-filled-text-field-label-text-size: 14px;
+    --mdc-filled-text-field-input-text-size: 14px;
+  
+    // Hint & error text
+    --mat-form-field-subscript-text-size: 12px;
+  }
+
+  .input-prefix {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 4px;
+    margin-left : 8px;
+    color: var(--mat-sys-on-surface-variant);
+  
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .input-element.no-prefix {
+    padding-left: 8px !important;
+  }
+  
+  [matSuffix].mat-mdc-icon-button {
+    --mdc-icon-button-state-layer-size: 36px;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 4px;
+  
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      color: var(--mat-sys-on-surface-variant);
+    }
+  }
+  
+  
+  // Remove Edge reveal button
+  input::-ms-reveal,
+  input::-ms-clear {
+    display: none;
+  }
+  
+  // Remove autofill decoration
+  input[type='password']::-webkit-credentials-auto-fill-button,
+  input[type='password']::-webkit-textfield-decoration-container {
+    display: none;
+  }
+  
+  input[type='password'] {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  
+  // Remove Number arrows
+  input[type='number'] {
+    -moz-appearance: textfield !important;
+    appearance: textfield !important;
+  
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none !important;
+      display: none !important;
+    }
+  }
+  
+  // Hide empty subscript wrapper(hint/error)
+  .mat-mdc-form-field-subscript-wrapper:empty {
+    display: none !important;
+  }
+
+  .required-asterisk {
+    color: var(--mat-sys-error);
+    margin-left: 2px;
+  }

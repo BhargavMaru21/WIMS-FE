@@ -1,0 +1,10 @@
+<div class="app-shell">
+  <app-sidebar [navItems]="navItems" [collapsed]="sidebarCollapsed()" roleLabel="STOCK KEEPER"
+    roleDesc="Warehouse operations access" />
+  <div class="shell-body">
+    <app-header [sidebarCollapsed]="sidebarCollapsed()" (toggleSidebar)="toggleSidebar()" />
+    <main class="shell-content">
+      <router-outlet />
+    </main>
+  </div>
+</div>

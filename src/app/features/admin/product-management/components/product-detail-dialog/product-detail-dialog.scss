@@ -1,0 +1,92 @@
+  .sku-badge {
+    font-family: monospace;
+    font-size: 0.82rem;
+    background: #f1f5f9;
+    color: #334155;
+    padding: 4px 12px;
+    border-radius: 5px;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+  }
+
+  .status-chip {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: #fee2e2;
+    color: #b91c1c;
+
+    &.active {
+      background: #dcfce7;
+      color: #15803d;
+    }
+  }
+
+  .product-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 16px;
+    line-height: 1.3;
+  }
+
+  .product-desc {
+    font-size: 0.875rem;
+    color: #475569;
+    margin: 0;
+    line-height: 1.6;
+
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    max-height: 150px;
+    overflow-y: auto;
+  }
+
+  .no-desc{
+    background-color: #e9e9e9;
+    color: rgb(99, 99, 99);
+    font-style: italic;
+  }
+
+  .divider {
+    height: 2px;
+    background: #eeedf5;
+    margin: 18px 0;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 24px;
+  }
+
+  .detail-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .detail-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #94a3b8;
+    letter-spacing: 0.07em;
+  }
+
+  .detail-value {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #1e293b;
+
+    &.price {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #0f172a;
+    }
+  }
+
+  .uom-abbr {
+    color: #94a3b8;
+    font-weight: 400;
+    font-size: 0.85rem;
+  }

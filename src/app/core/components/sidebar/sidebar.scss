@@ -1,0 +1,63 @@
+$sidebar-width: 220px;
+$sidebar-collapsed: 60px;
+
+.sidebar {
+  width: $sidebar-width;
+  min-height: 100%;
+  background: #fff;
+  border-right: 1px solid #e2e8f0;
+  transition: width 0.2s ease;
+  overflow: hidden;
+
+  &.collapsed {
+    width: $sidebar-collapsed;
+  }
+}
+
+.nav-item {
+  color: #475569;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+  }
+
+  &.active {
+    background: #eff6ff;
+    color: #2563eb;
+
+    .nav-icon {
+      color: #2563eb;
+    }
+  }
+}
+
+.nav-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: inherit;
+}
+
+.nav-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.role-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #2563eb;
+}
+
+.role-desc {
+  font-size: 11px;
+  color: #94a3b8;
+}

@@ -1,0 +1,35 @@
+<app-dialog [loading]="loading()" [submitDisabled]="form.invalid" (submitted)="onSubmit()">
+  <form [formGroup]="form">
+
+    <p>
+      Current role: <strong>{{ data.user.role }}</strong>
+    </p>
+
+    <mat-form-field appearance="outline" class="mb-3 w-100" subscriptSizing="dynamic">
+      <mat-label>New Role</mat-label>
+      <mat-select formControlName="role">
+        @for (r of roleOptions; track r) {
+        <mat-option [value]="r">{{ r }}</mat-option>
+        }
+      </mat-select>
+      @if (form.get('role')?.invalid && form.get('role')?.touched) {
+      <mat-error>Role is required</mat-error>
+      }
+    </mat-form-field>
+
+    @if (showWarehouseField) {
+    <mat-form-field appearance="outline" class="w-100" subscriptSizing="dynamic">
+      <mat-label>Warehouse</mat-label>
+      <mat-select formControlName="warehouseId">
+        @for (w of warehouses; track w.id) {
+        <mat-option [value]="w.id">{{ w.name }}</mat-option>
+        }
+      </mat-select>
+      @if (form.get('warehouseId')?.invalid && form.get('warehouseId')?.touched) {
+      <mat-error>Warehouse is required for this role</mat-error>
+      }
+    </mat-form-field>
+    }
+
+  </form>
+</app-dialog>

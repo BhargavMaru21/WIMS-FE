@@ -1,0 +1,20 @@
+<app-dialog
+  [loading]="loading()"
+  [submitDisabled]="form.invalid"
+  (submitted)="onSubmit()"
+>
+  <div class="reject-dialog">
+    <p class="reject-warning">
+     Are you sure to reject purchase order <strong>{{ data.poNumber }}</strong> ?
+    </p>
+
+    <form [formGroup]="form">
+      <app-input
+        formControlName="rejectionReason"
+        label="Rejection Reason"
+        placeholder="Rejection reason"
+        [customErrorMessage]="getError()"
+      />
+    </form>
+  </div>
+</app-dialog>

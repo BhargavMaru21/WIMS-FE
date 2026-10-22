@@ -1,0 +1,10 @@
+<div class="app-shell">
+  <app-sidebar [navItems]="navItems" [collapsed]="sidebarCollapsed()" roleLabel="ADMINISTRATOR"
+    roleDesc="Full system access granted" />
+  <div class="shell-body">
+    <app-header [sidebarCollapsed]="sidebarCollapsed()" (toggleSidebar)="toggleSidebar()" />
+    <main class="shell-content">
+      <router-outlet />
+    </main>
+  </div>
+</div>

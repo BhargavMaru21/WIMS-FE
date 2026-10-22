@@ -1,0 +1,48 @@
+<div class="dialog">
+
+    <!-- Header -->
+    <div class="dialog-header">
+      <h2 class="dialog-title">{{ config.title }}</h2>
+      <button
+        class="dialog-close"
+        type="button"
+        (click)="onClose()"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+  
+    <!-- Content-->
+    <div class="dialog-body">
+      <ng-content />
+    </div>
+  
+    <!-- Footer -->
+    @if (!config.hideFooter) {
+      <div class="dialog-footer">
+        <button
+          class="btn-cancel"
+          type="button"
+          (click)="onClose()"
+          [disabled]="loading()"
+        >
+          {{ cancelLabel }}
+        </button>
+  
+        <button
+          class="btn-submit"
+          [class.btn-danger]="config.submitColor === 'danger'"
+          type="button"
+          [disabled]="loading() || submitDisabled()"
+          (click)="onSubmit()"
+        >
+          @if (loading()) {
+            <span class="spinner"></span>
+          } @else {
+            {{ submitLabel }}
+          }
+        </button>
+      </div>
+    }
+  
+  </div>

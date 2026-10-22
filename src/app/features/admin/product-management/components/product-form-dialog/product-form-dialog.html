@@ -1,0 +1,70 @@
+<app-dialog
+  [loading]="loading()"
+  [submitDisabled]="form.invalid"
+  (submitted)="onSubmit()"
+>
+  <form [formGroup]="form">
+
+    <app-input
+      class="mb-3"
+      formControlName="name"
+      label="Product Name"
+      placeholder="Enter product name"
+      [customErrorMessage]="getError('name')"
+    />
+
+    <app-input
+      class="mb-3"
+      formControlName="description"
+      label="Description"
+      placeholder="Enter description (optional)"
+      [customErrorMessage]="getError('description')"
+    />
+
+    <mat-form-field appearance="outline" class="mb-3 w-100" subscriptSizing="dynamic">
+      <mat-label>Category</mat-label>
+      <mat-select formControlName="categoryId">
+        @for (c of categories; track c.id) {
+          <mat-option [value]="c.id">{{ c.name }}</mat-option>
+        }
+      </mat-select>
+      @if (form.get('categoryId')?.invalid && form.get('categoryId')?.touched) {
+        <mat-error>Category is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="mb-3 w-100" subscriptSizing="dynamic">
+      <mat-label>Unit of Measure</mat-label>
+      <mat-select formControlName="uomId">
+        @for (u of uoms; track u.id) {
+          <mat-option [value]="u.id">{{ u.name }} ({{ u.abbreviation }})</mat-option>
+        }
+      </mat-select>
+      @if (form.get('uomId')?.invalid && form.get('uomId')?.touched) {
+        <mat-error>Unit of measure is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <app-input
+      class="mb-3"
+      formControlName="unitPrice"
+      label="Unit Price (₹)"
+      placeholder="0.00"
+      type="number"
+      [min]="0.01"
+      [step]="0.01"
+      [customErrorMessage]="getError('unitPrice')"
+    />
+
+    <app-input
+      formControlName="reorderLevel"
+      label="Reorder Level"
+      placeholder="0"
+      type="number"
+      [min]="0"
+      [step]="0.01"
+      [customErrorMessage]="getError('reorderLevel')"
+    />
+
+  </form>
+</app-dialog>

@@ -1,0 +1,21 @@
+<app-dialog [loading]="loading()" [submitDisabled]="form.invalid" (submitted)="onSubmit()">
+
+  <form [formGroup]="form">
+
+    <mat-form-field appearance="outline" class="mb-3 w-100" subscriptSizing="dynamic">
+      <mat-label>Warehouse</mat-label>
+      <mat-select formControlName="warehouseId">
+        @for (w of warehouseOptions; track w) {
+        <mat-option [value]="w.id">{{ w.name }}</mat-option>
+        }
+      </mat-select>
+      @if (form.get('warehouseId')?.invalid && form.get('warehouseId')?.touched) {
+      <mat-error>Warehouse is required</mat-error>
+      }
+    </mat-form-field>
+
+    <app-input  formControlName="name" label="Zone Name" placeholder="Enter Zone name"
+      [customErrorMessage]="getNameError()" />
+  </form>
+
+</app-dialog>

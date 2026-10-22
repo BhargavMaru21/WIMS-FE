@@ -1,0 +1,54 @@
+<app-dialog>
+  @if (loading()) {
+  <div class="d-flex justify-content-center py-5">
+    <mat-spinner diameter="36" />
+  </div>
+  } @else if (product(); as p) {
+  <div class="pt-1 pb-3">
+
+    <div class="d-flex align-items-center gap-3 mb-3">
+      <span class="sku-badge">{{ p.sku }}</span>
+      <span class="status-chip" [class.active]="p.status === 'Active'">{{ p.status }}</span>
+    </div>
+
+    <h3 class="product-name">{{ p.name }}</h3>
+
+    <div class="d-flex flex-column mb-1 gap-1">
+      <span class="detail-label">Description</span>
+      <p class="product-desc">
+        <span [class.no-desc]="!p.description" >{{ p.description || 'No description' }}</span>
+      </p>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="detail-grid">
+
+      <div class="detail-item">
+        <span class="detail-label">Category</span>
+        <span class="detail-value">{{ p.categoryName }}</span>
+      </div>
+
+      <div class="detail-item">
+        <span class="detail-label">Unit of Measure</span>
+        <span class="detail-value">
+          {{ p.uomName }}
+          <span class="uom-abbr">· {{ p.uomAbbreviation }}</span>
+        </span>
+      </div>
+
+      <div class="detail-item">
+        <span class="detail-label">Unit Price</span>
+        <span class="detail-value price">₹{{ p.unitPrice | number:'1.2-2' }}</span>
+      </div>
+
+      <div class="detail-item">
+        <span class="detail-label">Reorder Level</span>
+        <span class="detail-value">{{ p.reorderLevel }} {{ p.uomAbbreviation }}</span>
+      </div>
+
+    </div>
+
+  </div>
+  }
+</app-dialog>
