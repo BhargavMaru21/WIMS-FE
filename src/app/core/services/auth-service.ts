@@ -154,11 +154,11 @@ export class AuthService {
   getDashboardRoute(): string {
     switch (this.role()) {
       case 'Administrator':
-        return '/admin/users';
+        return '/admin/dashboard';
       case 'WarehouseManager':
-        return '/manager/purchase-order';
+        return '/manager/dashboard';
       case 'StockKeeper':
-        return '/stock-keeper/goods-receipt';
+        return '/stock-keeper/dashboard';
       default:
         return '/auth/login';
     }

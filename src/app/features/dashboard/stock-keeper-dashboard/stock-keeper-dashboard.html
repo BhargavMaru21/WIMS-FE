@@ -1,0 +1,278 @@
+<div class="dashboard-container d-flex flex-column gap-4">
+  <!-- Header -->
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 pb-2 border-bottom">
+    <div>
+      <div class="d-flex align-items-center gap-2">
+        <h1 class="fs-4 fw-bold m-0 text-dark">Goods Receiving & Storage Status</h1>
+        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Stock Keeper</span>
+      </div>
+      <p class="text-secondary small m-0 mt-1">
+        Facility: <strong class="text-dark">{{ data()?.warehouseName }}</strong>
+      </p>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+      <a routerLink="/stock-keeper/goods-receipt" class="btn btn-success d-flex align-items-center gap-1 shadow-sm">
+        <mat-icon class="fs-6 align-middle">move_to_inbox</mat-icon> Open Goods Receipt
+      </a>
+      <button mat-stroked-button (click)="loadData()" [disabled]="loading()">
+        <mat-icon [class.spin-icon]="loading()">refresh</mat-icon> Refresh
+      </button>
+    </div>
+  </div>
+
+  @if (loading()) {
+  <div class="d-flex flex-column align-items-center justify-content-center py-5">
+    <mat-spinner diameter="44"></mat-spinner>
+    <span class="text-muted mt-3">Loading receiving operations...</span>
+  </div>
+  } @else if (data(); as d) {
+
+  <!-- KPI Cards -->
+  <div class="row g-3">
+    <!-- Pending Goods Receipts -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="kpi-card p-3 rounded-3 shadow-sm border bg-white h-100 d-flex flex-column justify-content-between">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <span class="text-muted small fw-medium text-uppercase">Inbound Receipts</span>
+            <h3 class="fs-3 fw-bold text-dark my-1">{{ d.kpis.pendingGoodsReceipts }}</h3>
+            <span class="text-primary small fw-medium">
+              <mat-icon class="inline-icon align-middle">local_shipping</mat-icon> Inbound shipments
+            </span>
+          </div>
+          <div class="kpi-icon-wrapper bg-primary-subtle text-primary">
+            <mat-icon>move_to_inbox</mat-icon>
+          </div>
+        </div>
+        <div class="mt-3 pt-2 border-top d-flex justify-content-between align-items-center">
+          <span class="text-secondary small">Ready for dock check-in</span>
+          <a routerLink="/stock-keeper/goods-receipt" class="small fw-semibold text-primary text-decoration-none">Receive &rarr;</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Receipts Processed Today -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="kpi-card p-3 rounded-3 shadow-sm border bg-white h-100 d-flex flex-column justify-content-between">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <span class="text-muted small fw-medium text-uppercase">Processed Today</span>
+            <h3 class="fs-3 fw-bold text-success my-1">{{ d.kpis.receiptsProcessedToday }} Shipments</h3>
+            <span class="text-success small fw-medium">
+              <mat-icon class="inline-icon align-middle">check_circle</mat-icon> 100% verified & put away
+            </span>
+          </div>
+          <div class="kpi-icon-wrapper bg-success-subtle text-success">
+            <mat-icon>task_alt</mat-icon>
+          </div>
+        </div>
+        <div class="mt-3 pt-2 border-top d-flex justify-content-between align-items-center">
+          <span class="text-secondary small">Dock shift active</span>
+          <span class="small text-muted fw-semibold">Standard shift</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bin Space Utilization -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="kpi-card p-3 rounded-3 shadow-sm border bg-white h-100 d-flex flex-column justify-content-between">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <span class="text-muted small fw-medium text-uppercase">Bin Space Utilization</span>
+            <h3 class="fs-3 fw-bold text-dark my-1">{{ d.kpis.binUtilizationPercentage }}%</h3>
+            <div class="progress my-1" style="height: 6px; width: 140px;">
+              <div
+                class="progress-bar bg-warning"
+                role="progressbar"
+                [style.width.%]="d.kpis.binUtilizationPercentage"
+                aria-valuenow="85.5"
+                aria-valuemin="0"
+                aria-valuemax="100"
+              ></div>
+            </div>
+            <span class="text-muted small">{{ d.kpis.totalAssignedBins }} Bins in facility</span>
+          </div>
+          <div class="kpi-icon-wrapper bg-warning-subtle text-warning">
+            <mat-icon>inventory</mat-icon>
+          </div>
+        </div>
+        <div class="mt-3 pt-2 border-top d-flex justify-content-between align-items-center">
+          <span class="text-secondary small">18 Bins available</span>
+          <span class="small text-warning-emphasis fw-semibold">High Capacity</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Low Stock Put-away Alerts -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="kpi-card p-3 rounded-3 shadow-sm border bg-white h-100 d-flex flex-column justify-content-between">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <span class="text-muted small fw-medium text-uppercase">Critical Stock Warning</span>
+            <h3 class="fs-3 fw-bold text-danger my-1">{{ d.kpis.lowStockAlerts }} Items</h3>
+            <span class="text-danger small">Fast replenishment required</span>
+          </div>
+          <div class="kpi-icon-wrapper bg-danger-subtle text-danger">
+            <mat-icon>priority_high</mat-icon>
+          </div>
+        </div>
+        <div class="mt-3 pt-2 border-top d-flex justify-content-between align-items-center">
+          <span class="text-secondary small">Prioritize incoming POs</span>
+          <span class="small text-danger fw-semibold">Priority 1</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="row g-4">
+    <!-- Receiving & Put-Away Activity -->
+    <div class="col-12 col-lg-8">
+      <div class="card border shadow-sm h-100">
+        <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <mat-icon class="text-primary">insights</mat-icon>
+            <h2 class="fs-6 fw-bold m-0 text-dark">Weekly Receiving & Put-Away Velocity</h2>
+          </div>
+          <span class="badge bg-light text-secondary border">This Week</span>
+        </div>
+        <div class="card-body">
+          <div class="chart-container" style="position: relative; height: 260px; width: 100%;">
+            <canvas #receivingActivityCanvas></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Zone Capacity Distribution -->
+    <div class="col-12 col-lg-4">
+      <div class="card border shadow-sm h-100">
+        <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <mat-icon class="text-success">grid_view</mat-icon>
+            <h2 class="fs-6 fw-bold m-0 text-dark">Zone Space Capacity</h2>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="chart-container" style="position: relative; height: 260px; width: 100%;">
+            <canvas #zoneCapacityCanvas></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Queues & Status -->
+  <div class="row g-4">
+    <!-- Inbound Shipment Queue -->
+    <div class="col-12 col-xl-6">
+      <div class="card border shadow-sm h-100">
+        <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <mat-icon class="text-primary">conveyor_belt</mat-icon>
+            <h2 class="fs-6 fw-bold m-0 text-dark">Inbound Shipments Queue</h2>
+          </div>
+          <a routerLink="/stock-keeper/goods-receipt" class="btn btn-sm btn-outline-primary">Open Receiving Dock</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr class="small text-secondary">
+                <th>PO Number</th>
+                <th>Supplier</th>
+                <th>Expected Delivery</th>
+                <th>Status</th>
+                <th class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of d.inboundShipmentsQueue; track item.poId) {
+              <tr>
+                <td class="font-monospace fw-semibold text-primary">{{ item.poNumber }}</td>
+                <td class="fw-medium text-dark">{{ item.supplierName }}</td>
+                <td class="small text-secondary">{{ item.expectedDelivery }}</td>
+                <td>
+                  <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                    {{ item.status }}
+                  </span>
+                </td>
+                <td class="text-end">
+                  <a routerLink="/stock-keeper/goods-receipt" class="btn btn-sm btn-success text-white">
+                    <mat-icon class="inline-icon align-middle">check</mat-icon> Receive
+                  </a>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bin Space Status -->
+    <div class="col-12 col-xl-6">
+      <div class="card border shadow-sm h-100">
+        <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <mat-icon class="text-warning">inbox</mat-icon>
+            <h2 class="fs-6 fw-bold m-0 text-dark">Storage Bins Status & Fill Levels</h2>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr class="small text-secondary">
+                <th>Bin Code</th>
+                <th>Zone</th>
+                <th>Occupancy</th>
+                <th>Fill %</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (bin of d.binOccupancyList; track bin.binCode) {
+              <tr>
+                <td class="font-monospace fw-semibold text-dark">{{ bin.binCode }}</td>
+                <td class="small text-secondary">{{ bin.zoneName }}</td>
+                <td class="small">{{ bin.currentItems }} / {{ bin.maxCapacity }}</td>
+                <td style="width: 140px;">
+                  <div class="progress" style="height: 6px;">
+                    <div
+                      class="progress-bar"
+                      [class.bg-danger]="bin.status === 'Full'"
+                      [class.bg-warning]="bin.status === 'Near Full'"
+                      [class.bg-success]="bin.status === 'Available'"
+                      role="progressbar"
+                      [style.width.%]="bin.utilizationPercent"
+                    ></div>
+                  </div>
+                </td>
+                <td>
+                  <span
+                    class="badge"
+                    [class.bg-danger-subtle]="bin.status === 'Full'"
+                    [class.text-danger]="bin.status === 'Full'"
+                    [class.border-danger-subtle]="bin.status === 'Full'"
+                    [class.bg-warning-subtle]="bin.status === 'Near Full'"
+                    [class.text-warning-emphasis]="bin.status === 'Near Full'"
+                    [class.border-warning-subtle]="bin.status === 'Near Full'"
+                    [class.bg-success-subtle]="bin.status === 'Available'"
+                    [class.text-success]="bin.status === 'Available'"
+                    [class.border-success-subtle]="bin.status === 'Available'"
+                    class="border"
+                  >
+                    {{ bin.status }}
+                  </span>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  }
+</div>
