@@ -12,7 +12,6 @@ const ADMIN_NAV: NavItem[] = [
   { label: 'Product Category', icon: 'category', route: '/admin/product-category' },
   { label: 'Products', icon: 'inventory_2', route: '/admin/products' },
   { label: 'Purchase Orders', icon: 'receipt', route: '/admin/purchase-orders' },
-  { label: 'Audit Logs', icon: 'receipt_long', route: '/admin/audit-logs' },
 ];
 
 @Component({
@@ -25,8 +24,17 @@ const ADMIN_NAV: NavItem[] = [
 export class AdminLayoutComponent {
   readonly navItems = ADMIN_NAV;
   readonly sidebarCollapsed = signal(false);
+  readonly mobileOpen = signal(false);
 
   toggleSidebar(): void {
-    this.sidebarCollapsed.update((v) => !v);
+    if (typeof window !== 'undefined' && window.innerWidth < 992) {
+      this.mobileOpen.update((v) => !v);
+    } else {
+      this.sidebarCollapsed.update((v) => !v);
+    }
+  }
+
+  closeMobile(): void {
+    this.mobileOpen.set(false);
   }
 }

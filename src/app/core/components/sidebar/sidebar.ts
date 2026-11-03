@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
@@ -20,6 +20,9 @@ export interface NavItem {
 export class SidebarComponent {
   readonly navItems = input<NavItem[]>([]);
   readonly collapsed = input<boolean>(false);
-  readonly roleLabel = input<string>('');
-  readonly roleDesc = input<string>('');
+  readonly closeMobile = output<void>();
+
+  onNavClick(): void {
+    this.closeMobile.emit();
+  }
 }

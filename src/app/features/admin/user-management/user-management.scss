@@ -1,54 +1,12 @@
-.search-field {
-    flex: 1 1 260px;
-    min-width: 200px;
-    max-width: 300px;
-  }
-  
-  .filter-field {
-    flex: 0 0 180px;
-  }
-  
-  .no-data {
-    padding: 32px;
-    color: var(--mat-sys-on-surface-variant);
-  }
-  
-  .status-badge {
-    display: inline-block;
-    padding: 2px 10px;
-    border-radius: 12px;
-    font-size: 0.78rem;
-    font-weight: 500;
-  
-    &.active {
-      background: #e6f4ea;
-      color: #1e7e34;
-    }
-  
-    &.inactive {
-      background: #fce8e6;
-      color: #c5221f;
-    }
-  
-    &.locked {
-      background: #fff3e0;
-      color: #e65100;
-    }
-  }
-  
-  .dialog-form {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding: 4px 0;
-  
-    .w-100 {
-      width: 100%;
-    }
-  }
-  
+.user-cell-avatar {
+  width: 32px;
+  height: 32px;
+  background: var(--wims-primary-light, #eff6ff);
+  color: var(--wims-primary, #2563eb);
 
-      
-      
-      
-      
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}

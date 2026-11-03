@@ -1,78 +1,46 @@
-.search-field {
-  flex: 1 1 260px;
-  min-width: 200px;
-  max-width: 300px;
-}
-
-.filter-field {
-  flex: 0 0 180px;
-}
-
-.filter-field-wide {
-  flex: 0 0 240px;
-}
-
-.no-data {
-  padding: 32px;
-  color: #49454f;
-}
-
-.po-badge {
-  font-family: monospace;
-  font-size: 0.8rem;
-  background: #f3f3f3;
-  padding: 2px 8px;
-  border-radius: 4px;
-  color: #333;
-}
-
 .clickable-row {
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background-color 0.15s ease;
 
   &:hover {
-    background: rgba(0, 0, 0, 0.03);
+    background-color: #f1f5f9 !important;
   }
 }
 
-.no-actions {
-  font-size: 1.1rem;
-  display: inline-block;
-  width: 100%;
-  margin-left: 12px;
-}
-
 .status-chip {
-  font-size: 0.75rem;
+  font-size: 12px;
   font-weight: 600;
   padding: 3px 10px;
-  border-radius: 20px;
+  border-radius: 9999px;
   display: inline-block;
 
   &.status-draft {
     background: #f1f5f9;
     color: #475569;
+    border: 1px solid #e2e8f0;
   }
 
   &.status-submitted {
-    background: #fef3c7;
-    color: #92400e;
+    background: #ecfeff;
+    color: #0e7490;
+    border: 1px solid #a5f3fc;
   }
 
-  &.status-approved,
-  &.status-partiallyreceived,
-  &.status-fullyreceived {
-    background: #dcfce7;
-    color: #15803d;
+  &.status-approved {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
   }
 
   &.status-rejected {
-    background: #fee2e2;
+    background: #fef2f2;
     color: #b91c1c;
+    border: 1px solid #fecaca;
   }
 
-  &.status-cancelled {
-    background: #e5e7eb;
-    color: #4b5563;
+  &.status-completed {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
   }
 }

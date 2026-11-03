@@ -1,17 +1,58 @@
 @use '@angular/material' as mat;
 
+// --- WIMS Global Design Tokens & Variables ---
 :root {
+  --wims-primary: #2563eb;
+  --wims-primary-hover: #1d4ed8;
+  --wims-primary-light: #eff6ff;
+  --wims-primary-glow: rgba(37, 99, 235, 0.15);
+
+  --wims-secondary: #475569;
+  --wims-success: #10b981;
+  --wims-success-bg: #ecfdf5;
+  --wims-warning: #f59e0b;
+  --wims-warning-bg: #fffbeb;
+  --wims-danger: #ef4444;
+  --wims-danger-bg: #fef2f2;
+  --wims-info: #06b6d4;
+  --wims-info-bg: #ecfeff;
+
+  --wims-surface-ground: #f8fafc;
+  --wims-surface-card: #ffffff;
+  --wims-surface-muted: #f1f5f9;
+  --wims-surface-hover: #f8fafc;
+
+  --wims-border-subtle: #f1f5f9;
+  --wims-border-default: #e2e8f0;
+  --wims-border-focus: #93c5fd;
+
+  --wims-text-heading: #0f172a;
+  --wims-text-body: #334155;
+  --wims-text-muted: #64748b;
+  --wims-text-subtle: #94a3b8;
+
+  --wims-radius-sm: 6px;
+  --wims-radius-md: 10px;
+  --wims-radius-lg: 14px;
+  --wims-radius-xl: 18px;
+
+  --wims-shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+  --wims-shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.08), 0 1px 2px -1px rgba(15, 23, 42, 0.06);
+  --wims-shadow-card: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+  --wims-shadow-elevated: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.05);
+  --wims-shadow-glow: 0 0 20px rgba(37, 99, 235, 0.15);
+
   @include mat.table-overrides((
-    background-color: white 
+    background-color: transparent,
   ));
 
   @include mat.paginator-overrides((
-    container-background-color: white, 
+    container-background-color: transparent,
   ));
 }
 
-//reduce input height
-@include mat.form-field-density(-3); 
+// Compact Material form fields
+@include mat.form-field-density(-3);
 
 html {
   @include mat.theme((
@@ -24,15 +65,7 @@ html {
   ));
 }
 
-body {
-  color-scheme: light;
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-medium);
-  margin: 0;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
-}
-
+// --- Base Reset & Typography ---
 html, body {
   height: 100%;
 }
@@ -41,43 +74,402 @@ html, body {
   box-sizing: border-box;
 }
 
+body {
+  color-scheme: light;
+  background-color: var(--wims-surface-ground);
+  color: var(--wims-text-body);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 a {
   text-decoration: none;
+  color: inherit;
 }
 
-// Mat dialog border radius
-.mat-mdc-dialog-container .mdc-dialog__surface {
-  border-radius: 12px !important;
+// Modern Scrollbars
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+  &:hover {
+    background: #94a3b8;
+  }
 }
 
-// Mat menu border radius
-.mat-mdc-menu-panel {
-  border-radius: 10px !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+// --- Reusable WIMS Card Components ---
+.wims-card {
+  background: var(--wims-surface-card);
+  border: 1px solid var(--wims-border-default);
+  border-radius: var(--wims-radius-lg);
+  box-shadow: var(--wims-shadow-xs);
+  overflow: hidden;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    border-color: #cbd5e1;
+  }
 }
 
-// Mat button adjustments
-.mat-mdc-unelevated-button,
-.mat-mdc-raised-button {
-  letter-spacing: normal !important;
+.wims-card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--wims-border-subtle);
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
-.small-switch {
-  transform: scale(0.8); 
-  transform-origin: left center;
-  width: max-content; 
+.wims-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--wims-text-heading);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
+.wims-card-body {
+  padding: 20px;
+}
+
+// --- Page Titles & Breadcrumbs ---
+.page-header {
+  margin-bottom: 1.5rem;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--wims-text-heading);
+  letter-spacing: -0.02em;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.page-subtitle {
+  font-size: 0.875rem;
+  color: var(--wims-text-muted);
+  margin-top: 4px;
+  margin-bottom: 0;
+}
+
+// --- Universal Badges ---
+.wims-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+
+  .badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  &.wims-badge-success, &.active {
+    background: var(--wims-success-bg);
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+    .badge-dot { background: var(--wims-success); }
+  }
+
+  &.wims-badge-danger, &.inactive, &.locked {
+    background: var(--wims-danger-bg);
+    color: #991b1b;
+    border: 1px solid #fecaca;
+    .badge-dot { background: var(--wims-danger); }
+  }
+
+  &.wims-badge-warning, &.pending {
+    background: var(--wims-warning-bg);
+    color: #92400e;
+    border: 1px solid #fde68a;
+    .badge-dot { background: var(--wims-warning); }
+  }
+
+  &.wims-badge-info, &.submitted {
+    background: var(--wims-info-bg);
+    color: #155e75;
+    border: 1px solid #a5f3fc;
+    .badge-dot { background: var(--wims-info); }
+  }
+
+  &.wims-badge-primary {
+    background: var(--wims-primary-light);
+    color: var(--wims-primary);
+    border: 1px solid #bfdbfe;
+    .badge-dot { background: var(--wims-primary); }
+  }
+
+  &.wims-badge-secondary, &.draft {
+    background: var(--wims-surface-muted);
+    color: var(--wims-secondary);
+    border: 1px solid var(--wims-border-default);
+    .badge-dot { background: var(--wims-secondary); }
+  }
+
+  &.wims-badge-admin {
+    background: #f5f3ff;
+    color: #6d28d9;
+    border: 1px solid #ddd6fe;
+    .badge-dot { background: #7c3aed; }
+  }
+
+  &.wims-badge-manager {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+    .badge-dot { background: #2563eb; }
+  }
+
+  &.wims-badge-stock-keeper {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+    .badge-dot { background: #10b981; }
+  }
+}
+
+// Legacy alias compatibility
+.status-badge {
+  @extend .wims-badge;
+}
+
+// --- Modern Filter Toolbar ---
+.filter-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  background: #ffffff;
+  padding: 14px 18px;
+  border: 1px solid var(--wims-border-default);
+  border-radius: var(--wims-radius-md);
+  box-shadow: var(--wims-shadow-xs);
+
+  .search-field {
+    flex: 1 1 240px;
+    min-width: 200px;
+  }
+
+  .filter-field {
+    flex: 0 0 160px;
+    min-width: 140px;
+  }
+
+  .filter-field-wide {
+    flex: 0 0 200px;
+    min-width: 160px;
+  }
+
+  @media (max-width: 768px) {
+    padding: 12px;
+    gap: 10px;
+
+    .search-field, .filter-field, .filter-field-wide {
+      flex: 1 1 100% !important;
+      min-width: 100% !important;
+    }
+  }
+}
+
+// --- Modern Table Container & Overrides ---
+.wims-table-container {
+  background: #ffffff;
+  border: 1px solid var(--wims-border-default);
+  border-radius: var(--wims-radius-lg);
+  box-shadow: var(--wims-shadow-xs);
+  overflow: hidden;
+  position: relative;
+
+  .mat-mdc-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+
+    .mat-mdc-header-row {
+      background: #f8fafc;
+      min-height: 46px;
+      border-bottom: 1px solid var(--wims-border-default);
+    }
+
+    .mat-mdc-header-cell {
+      color: var(--wims-text-muted);
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--wims-border-default);
+      padding: 12px 16px;
+      white-space: nowrap;
+    }
+
+    .mat-mdc-row {
+      min-height: 52px;
+      transition: background-color 0.15s ease;
+
+      &:hover {
+        background-color: #f8fafc;
+      }
+
+      &:not(:last-child) .mat-mdc-cell {
+        border-bottom: 1px solid var(--wims-border-subtle);
+      }
+    }
+
+    .mat-mdc-cell {
+      color: var(--wims-text-body);
+      font-size: 13.5px;
+      padding: 12px 16px;
+      vertical-align: middle;
+    }
+  }
+
+  .mat-mdc-paginator {
+    border-top: 1px solid var(--wims-border-subtle);
+    background: #fafbfc;
+  }
+}
+
+// --- Empty State ---
+.wims-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+  text-align: center;
+
+  .empty-icon-wrap {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--wims-surface-muted);
+    color: var(--wims-text-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+
+    mat-icon, i {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+    }
+  }
+
+  .empty-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--wims-text-heading);
+    margin-bottom: 4px;
+  }
+
+  .empty-description {
+    font-size: 13.5px;
+    color: var(--wims-text-muted);
+    max-width: 360px;
+    margin-bottom: 16px;
+  }
+}
+
+// --- Loading Overlay ---
 .loading-overlay {
   position: absolute;
   inset: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(2px);
   z-index: 10;
+  gap: 12px;
+
+  span {
+    font-size: 13px;
+    color: var(--wims-text-muted);
+    font-weight: 500;
+  }
+}
+
+// --- Material Component Overrides ---
+.mat-mdc-dialog-container .mdc-dialog__surface {
+  border-radius: var(--wims-radius-xl) !important;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25) !important;
+}
+
+.mat-mdc-menu-panel {
+  border-radius: var(--wims-radius-md) !important;
+  border: 1px solid var(--wims-border-default) !important;
+  box-shadow: var(--wims-shadow-elevated) !important;
+  padding: 4px !important;
+
+  .mat-mdc-menu-item {
+    border-radius: var(--wims-radius-sm);
+    font-size: 13.5px;
+    min-height: 38px;
+    height: 38px;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      margin-right: 10px;
+      color: var(--wims-text-muted);
+    }
+
+    &:hover {
+      background-color: var(--wims-surface-muted);
+    }
+  }
+}
+
+.mat-mdc-button,
+.mat-mdc-unelevated-button,
+.mat-mdc-raised-button,
+.mat-mdc-outlined-button {
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  letter-spacing: normal !important;
+}
+
+.small-switch {
+  transform: scale(0.85);
+  transform-origin: left center;
+  width: max-content;
 }
 
 .mat-mdc-form-field-required-marker {
-  color:var(--mat-sys-error) !important;
+  color: var(--wims-danger) !important;
+}
+
+// Code & SKU tags
+.wims-code-pill {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #e2e8f0;
 }

@@ -1,158 +1,224 @@
-<div class="d-flex flex-column gap-4">
+<div class="d-flex flex-column gap-3">
 
-  <!-- header -->
-  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-    <h1 class="fs-4 m-0 fw-semibold">Products</h1>
+  <!-- Header & Primary Actions -->
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div>
+      <h1 class="page-title">Products</h1>
+      <p class="page-subtitle">Central inventory master data, SKU catalog, unit prices, and replenishment thresholds.</p>
+    </div>
+
+    <!-- Actions Group -->
     <div class="d-flex align-items-center gap-2 flex-wrap">
+      <a href="assets/Template_File.xlsx" download="template.xlsx" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1">
+        <mat-icon class="fs-6">download</mat-icon> Template
+      </a>
 
-      
-      <a href="assets/Template_File.xlsx" download="temlate.xlsx" class="download-btn"><mat-icon>upload</mat-icon> Download Import Template</a>
-
-
-      <button mat-flat-button color="primary" (click)="openCreateDialog()">
-        <mat-icon>add</mat-icon> Create Product
-      </button>
-
-    </div>
-  </div>
-
-  <!-- filters -->
-  <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
-
-    <div class="d-flex align-items-center gap-4">
-      <app-input class="search-field" label="Search" placeholder="Search by name, SKU..." subscriptSizing="dynamic"
-        icon="search" [maxlength]="101" [customErrorMessage]="searchError()" [formControl]="search" />
-
-      <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
-        <mat-label>Status</mat-label>
-        <mat-select [value]="statusFilter()" (selectionChange)="onStatusFilter($event.value)">
-          @for (s of statusOptions; track s) {
-          <mat-option [value]="s">{{ s }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="filter-field-wide" subscriptSizing="dynamic">
-        <mat-label>Category</mat-label>
-        <mat-select multiple [value]="selectedCategoryIds()" (selectionChange)="onCategoryFilter($event.value)">
-          @for (c of allCategories(); track c.id) {
-          <mat-option [value]="c.id">{{ c.name }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      @if (statusFilter() || categoryFilter() || search.value) {
-      <button mat-stroked-button (click)="clearFilters()" class="align-self-start">
-        <mat-icon>clear</mat-icon> Clear
-      </button>
-      }
-    </div>
-
-    <div class="d-flex align-items-center gap-4">
       <button mat-stroked-button (click)="openUomDialog()">
         <mat-icon>straighten</mat-icon> Units
       </button>
 
-      <label mat-stroked-button class="import-btn" [class.loading-btn]="importing()">
+      <label mat-stroked-button class="import-btn m-0" [class.loading-btn]="importing()">
         @if (importing()) {
-        <mat-spinner diameter="18" />
+          <mat-spinner diameter="18" />
         } @else {
-        <mat-icon>upload</mat-icon>
+          <mat-icon>upload</mat-icon>
         }
-        Import Products
+        Import
         <input type="file" accept=".xlsx" (change)="onImport($event)" class="d-none" />
       </label>
 
       <button mat-stroked-button (click)="onExport()" [disabled]="exporting()">
         @if (exporting()) {
-        <mat-spinner diameter="18" />
+          <mat-spinner diameter="18" />
         } @else {
-        <mat-icon>download</mat-icon>
+          <mat-icon>download</mat-icon>
         }
-        Export Products
+        Export
+      </button>
+
+      <button mat-flat-button color="primary" (click)="openCreateDialog()" class="shadow-sm">
+        <mat-icon>add</mat-icon> Create Product
       </button>
     </div>
   </div>
 
-  <!-- table -->
-  <div class="position-relative border-2 overflow-auto">
+  <!-- Filters Toolbar -->
+  <div class="filter-toolbar">
+    <app-input
+      class="search-field"
+      label="Search"
+      placeholder="Search by name, SKU..."
+      subscriptSizing="fixed"
+      icon="search"
+      [maxlength]="101"
+      [customErrorMessage]="searchError()"
+      [formControl]="search"
+    />
+
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Status</mat-label>
+      <mat-select [value]="statusFilter()" (selectionChange)="onStatusFilter($event.value)">
+        <mat-option value="">All Statuses</mat-option>
+        @for (s of statusOptions; track s) {
+          <mat-option [value]="s">{{ s }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-field-wide">
+      <mat-label>Category</mat-label>
+      <mat-select multiple [value]="selectedCategoryIds()" (selectionChange)="onCategoryFilter($event.value)">
+        @for (c of allCategories(); track c.id) {
+          <mat-option [value]="c.id">{{ c.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    @if (statusFilter() || categoryFilter() || search.value) {
+      <button mat-stroked-button (click)="clearFilters()" class="align-self-center ms-auto">
+        <mat-icon>clear</mat-icon> Clear Filters
+      </button>
+    }
+  </div>
+
+  <!-- Table Container -->
+  <div class="wims-table-container">
     @if (loading()) {
-    <div class="loading-overlay">
-      <mat-spinner diameter="40" />
-    </div>
+      <div class="loading-overlay">
+        <mat-spinner diameter="40" />
+        <span>Loading catalog items...</span>
+      </div>
     }
 
-    <table mat-table [dataSource]="dataSource" matSort (matSortChange)="onSort($event)" class="w-100">
+    <div class="overflow-x-auto">
+      <table mat-table [dataSource]="dataSource" matSort (matSortChange)="onSort($event)" class="w-100">
 
-      <ng-container matColumnDef="sku">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>SKU</th>
-        <td mat-cell *matCellDef="let row">
-          <span class="sku-badge sku-link" (click)="openDetailDialog(row)">{{ row.sku }}</span>
-        </td>
-      </ng-container>
+        <!-- SKU -->
+        <ng-container matColumnDef="sku">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>SKU</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="wims-code-pill sku-link" (click)="openDetailDialog(row)" title="View product details">
+              {{ row.sku }}
+            </span>
+          </td>
+        </ng-container>
 
-      <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-        <td mat-cell *matCellDef="let row">{{ row.name }}</td>
-      </ng-container>
+        <!-- Name -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Product Name</th>
+          <td mat-cell *matCellDef="let row">
+            <div class="d-flex align-items-center gap-2">
+              <mat-icon class="text-primary fs-5">inventory_2</mat-icon>
+              <span class="fw-semibold text-dark">{{ row.name }}</span>
+            </div>
+          </td>
+        </ng-container>
 
-      <ng-container matColumnDef="categoryName">
-        <th mat-header-cell *matHeaderCellDef>Category</th>
-        <td mat-cell *matCellDef="let row">{{ row.categoryName }}</td>
-      </ng-container>
+        <!-- Category -->
+        <ng-container matColumnDef="categoryName">
+          <th mat-header-cell *matHeaderCellDef>Category</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="badge bg-light text-dark border px-2 py-1">{{ row.categoryName }}</span>
+          </td>
+        </ng-container>
 
-      <ng-container matColumnDef="unitOfMeasure">
-        <th mat-header-cell *matHeaderCellDef>UnitOfMeasure</th>
-        <td mat-cell *matCellDef="let row">{{ row.uomName }}</td>
-      </ng-container>
+        <!-- Unit of Measure -->
+        <ng-container matColumnDef="unitOfMeasure">
+          <th mat-header-cell *matHeaderCellDef>Unit</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="text-secondary">{{ row.uomName }}</span>
+          </td>
+        </ng-container>
 
-      <ng-container matColumnDef="unitPrice">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Unit Price</th>
-        <td mat-cell *matCellDef="let row">₹{{ row.unitPrice | number:'1.2-2' }}</td>
-      </ng-container>
+        <!-- Unit Price -->
+        <ng-container matColumnDef="unitPrice">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Unit Price</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="fw-semibold text-dark">₹{{ row.unitPrice | number:'1.2-2' }}</span>
+          </td>
+        </ng-container>
 
-      <ng-container matColumnDef="reorderLevel">
-        <th mat-header-cell *matHeaderCellDef>Reorder Level</th>
-        <td mat-cell *matCellDef="let row">{{ row.reorderLevel }}</td>
-      </ng-container>
+        <!-- Reorder Level -->
+        <ng-container matColumnDef="reorderLevel">
+          <th mat-header-cell *matHeaderCellDef>Reorder Level</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="text-secondary">{{ row.reorderLevel }}</span>
+          </td>
+        </ng-container>
 
-      <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef>Status</th>
-        <td mat-cell *matCellDef="let row">
-          <mat-slide-toggle class="small-switch" [checked]="row.status === 'Active'" color="primary"
-            (change)="$event.source.checked = row.status === 'Active'; toggleStatus(row)"
-            (click)="$event.stopPropagation()" />
-        </td>
-      </ng-container>
+        <!-- Status -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let row">
+            <div class="d-flex align-items-center gap-2">
+              <mat-slide-toggle
+                class="small-switch"
+                [checked]="row.status === 'Active'"
+                color="primary"
+                (change)="$event.source.checked = row.status === 'Active'; toggleStatus(row)"
+                (click)="$event.stopPropagation()"
+              ></mat-slide-toggle>
+              <span
+                class="wims-badge"
+                [class.active]="row.status === 'Active'"
+                [class.inactive]="row.status !== 'Active'"
+              >
+                {{ row.status }}
+              </span>
+            </div>
+          </td>
+        </ng-container>
 
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>Actions</th>
-        <td mat-cell *matCellDef="let row">
-          <button mat-icon-button [matMenuTriggerFor]="menu">
-            <mat-icon>more_vert</mat-icon>
-          </button>
-          <mat-menu #menu="matMenu">
-            <button mat-menu-item (click)="openEditDialog(row)">
-              <mat-icon>edit</mat-icon> Edit
+        <!-- Actions -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="text-end">Actions</th>
+          <td mat-cell *matCellDef="let row" class="text-end">
+            <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Product actions">
+              <mat-icon>more_vert</mat-icon>
             </button>
-            <button mat-menu-item (click)="openDeleteDialog(row)">
-              <mat-icon>delete</mat-icon> Delete
-            </button>
-          </mat-menu>
-        </td>
-      </ng-container>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="openDetailDialog(row)">
+                <mat-icon>visibility</mat-icon> View Details
+              </button>
+              <button mat-menu-item (click)="openEditDialog(row)">
+                <mat-icon>edit</mat-icon> Edit Product
+              </button>
+              <button mat-menu-item (click)="openDeleteDialog(row)">
+                <mat-icon class="text-danger">delete</mat-icon>
+                <span class="text-danger">Delete Product</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 
-      <tr class="mat-row" *matNoDataRow>
-        <td class="mat-cell text-center no-data" [attr.colspan]="displayedColumns.length">
-          No products found.
-        </td>
-      </tr>
-    </table>
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+            <div class="wims-empty-state">
+              <div class="empty-icon-wrap">
+                <mat-icon>inventory_2</mat-icon>
+              </div>
+              <h3 class="empty-title">No products found</h3>
+              <p class="empty-description">Create products or clear the active search filter.</p>
+              @if (statusFilter() || categoryFilter() || search.value) {
+                <button mat-stroked-button (click)="clearFilters()">Clear Filters</button>
+              }
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
 
-    <mat-paginator [length]="totalCount()" [pageSize]="pageSize()" [pageIndex]="pageIndex()"
-      [pageSizeOptions]="[5, 10, 25, 50]" (page)="onPage($event)" />
+    <mat-paginator
+      [length]="totalCount()"
+      [pageSize]="pageSize()"
+      [pageIndex]="pageIndex()"
+      [pageSizeOptions]="[5, 10, 25, 50]"
+      (page)="onPage($event)"
+      showFirstLastButtons
+    />
   </div>
+
 </div>

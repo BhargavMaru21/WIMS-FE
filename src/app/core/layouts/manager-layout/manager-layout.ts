@@ -5,12 +5,7 @@ import { HeaderComponent } from '../../components/header/header';
 
 const MANAGER_NAV: NavItem[] = [
   { label: 'Dashboard', icon: 'dashboard', route: '/manager/dashboard' },
-  { label: 'Purchase Order', icon: 'receipt', route: '/manager/purchase-order' },
-  { label: 'Goods Receipts', icon: 'move_to_inbox', route: '/manager/goods-receipts' },
-  { label: 'Goods Dispatch', icon: 'local_shipping', route: '/manager/goods-dispatch' },
-  { label: 'Stock Transfers', icon: 'swap_horiz', route: '/manager/stock-transfers' },
-  { label: 'Adjustments', icon: 'tune', route: '/manager/adjustments' },
-  { label: 'Reorder Alerts', icon: 'notification_important', route: '/manager/reorder-alerts' },
+  { label: 'Purchase Orders', icon: 'receipt', route: '/manager/purchase-order' },
 ];
 
 @Component({
@@ -23,8 +18,17 @@ const MANAGER_NAV: NavItem[] = [
 export class ManagerLayoutComponent {
   readonly navItems = MANAGER_NAV;
   readonly sidebarCollapsed = signal(false);
+  readonly mobileOpen = signal(false);
 
   toggleSidebar(): void {
-    this.sidebarCollapsed.update((v) => !v);
+    if (typeof window !== 'undefined' && window.innerWidth < 992) {
+      this.mobileOpen.update((v) => !v);
+    } else {
+      this.sidebarCollapsed.update((v) => !v);
+    }
+  }
+
+  closeMobile(): void {
+    this.mobileOpen.set(false);
   }
 }

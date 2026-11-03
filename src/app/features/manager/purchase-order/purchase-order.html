@@ -1,14 +1,18 @@
-<div class="d-flex flex-column gap-4">
+<div class="d-flex flex-column gap-3">
 
+  <!-- Header -->
   <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-    <h1 class="fs-4 m-0 fw-semibold">Purchase Orders</h1>
-    <button mat-flat-button color="primary" (click)="openCreateDialog()">
+    <div>
+      <h1 class="page-title">Purchase Orders</h1>
+      <p class="page-subtitle">Create procurement requests, monitor approval workflows, and manage inbound inventory receipts.</p>
+    </div>
+    <button mat-flat-button color="primary" (click)="openCreateDialog()" class="shadow-sm">
       <mat-icon>add</mat-icon> Create Purchase Order
     </button>
   </div>
 
-  <div class="d-flex flex-wrap align-items-center gap-4">
-
+  <!-- Filters Toolbar -->
+  <div class="filter-toolbar">
     <app-input
       class="search-field"
       label="Search"
@@ -23,7 +27,7 @@
     <mat-form-field appearance="outline" class="filter-field">
       <mat-label>Status</mat-label>
       <mat-select [value]="statusFilter()" (selectionChange)="onStatusFilter($event.value)">
-        <mat-option value="">All</mat-option>
+        <mat-option value="">All Statuses</mat-option>
         @for (s of statusOptions; track s) {
           <mat-option [value]="s">{{ s }}</mat-option>
         }
@@ -31,106 +35,136 @@
     </mat-form-field>
 
     @if (statusFilter() || search.value) {
-      <button mat-stroked-button (click)="clearFilters()" class="align-self-start">
-        <mat-icon>clear</mat-icon> Clear
+      <button mat-stroked-button (click)="clearFilters()" class="align-self-center ms-auto">
+        <mat-icon>clear</mat-icon> Clear Filters
       </button>
     }
   </div>
 
-  <div class="position-relative border-2 overflow-auto">
+  <!-- Table Container -->
+  <div class="wims-table-container">
     @if (loading()) {
       <div class="loading-overlay">
         <mat-spinner diameter="40" />
+        <span>Loading purchase orders...</span>
       </div>
     }
 
-    <table mat-table [dataSource]="dataSource" matSort (matSortChange)="onSort($event)" class="w-100">
+    <div class="overflow-x-auto">
+      <table mat-table [dataSource]="dataSource" matSort (matSortChange)="onSort($event)" class="w-100">
 
-      <ng-container matColumnDef="poNumber">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>PO Number</th>
-        <td mat-cell *matCellDef="let row">
-          <span class="po-badge">{{ row.poNumber }}</span>
-        </td>
-      </ng-container>
+        <!-- PO Number -->
+        <ng-container matColumnDef="poNumber">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>PO Number</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="wims-code-pill text-primary fw-bold">{{ row.poNumber }}</span>
+          </td>
+        </ng-container>
 
-      <ng-container matColumnDef="supplierName">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Supplier</th>
-        <td mat-cell *matCellDef="let row">{{ row.supplierName }}</td>
-      </ng-container>
+        <!-- Supplier -->
+        <ng-container matColumnDef="supplierName">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Supplier</th>
+          <td mat-cell *matCellDef="let row">
+            <div class="d-flex align-items-center gap-2">
+              <mat-icon class="text-secondary fs-5">business</mat-icon>
+              <span class="fw-semibold text-dark">{{ row.supplierName }}</span>
+            </div>
+          </td>
+        </ng-container>
 
-      <ng-container matColumnDef="orderDate">
-        <th mat-header-cell *matHeaderCellDef>Order Date</th>
-        <td mat-cell *matCellDef="let row">{{ row.orderDate ? (row.orderDate | date:'mediumDate') : '—' }}</td>
-      </ng-container>
+        <!-- Order Date -->
+        <ng-container matColumnDef="orderDate">
+          <th mat-header-cell *matHeaderCellDef>Order Date</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="text-secondary">{{ row.orderDate ? (row.orderDate | date:'mediumDate') : '—' }}</span>
+          </td>
+        </ng-container>
 
-      <ng-container matColumnDef="expectedDelivery">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Expected Delivery</th>
-        <td mat-cell *matCellDef="let row">{{ row.expectedDelivery | date:'mediumDate' }}</td>
-      </ng-container>
+        <!-- Expected Delivery -->
+        <ng-container matColumnDef="expectedDelivery">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Expected Delivery</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="text-dark">{{ row.expectedDelivery | date:'mediumDate' }}</span>
+          </td>
+        </ng-container>
 
-      <ng-container matColumnDef="totalAmount">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Total</th>
-        <td mat-cell *matCellDef="let row">₹{{ row.totalAmount | number:'1.2-2' }}</td>
-      </ng-container>
+        <!-- Total Amount -->
+        <ng-container matColumnDef="totalAmount">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Total</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="fw-bold text-dark">₹{{ row.totalAmount | number:'1.2-2' }}</span>
+          </td>
+        </ng-container>
 
-      <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef>Status</th>
-        <td mat-cell *matCellDef="let row">
-          <span class="status-chip" [ngClass]="statusClass(row.status)">{{ row.status }}</span>
-        </td>
-      </ng-container>
+        <!-- Status -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="status-chip" [ngClass]="statusClass(row.status)">{{ row.status }}</span>
+          </td>
+        </ng-container>
 
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>Actions</th>
-        <td mat-cell *matCellDef="let row">
-          @if (hasMenuActions(row)) {
-            <button mat-icon-button [matMenuTriggerFor]="menu" (click)="$event.stopPropagation()">
-              <mat-icon>more_vert</mat-icon>
-            </button>
-            <mat-menu #menu="matMenu">
-
-              @if (row.canEdit) {
-                <button mat-menu-item (click)="openEditDialog(row)">
-                  <mat-icon>edit</mat-icon> Edit
-                </button>
-                <button mat-menu-item (click)="submitPo(row)">
-                  <mat-icon>send</mat-icon> Submit for Approval
-                </button>
-                <button mat-menu-item (click)="cancelPo(row)">
-                  <mat-icon>block</mat-icon> Cancel
-                </button>
-              }
-
-              @if (row.status === 'Submitted') {
-                @if (row.canApprove) {
-                  <button mat-menu-item (click)="approvePo(row)">
-                    <mat-icon>check_circle</mat-icon> Approve
+        <!-- Actions -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="text-end">Actions</th>
+          <td mat-cell *matCellDef="let row" class="text-end">
+            @if (hasMenuActions(row)) {
+              <button mat-icon-button [matMenuTriggerFor]="menu" (click)="$event.stopPropagation()" aria-label="PO actions">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                @if (row.canEdit) {
+                  <button mat-menu-item (click)="openEditDialog(row)">
+                    <mat-icon>edit</mat-icon> Edit Order
                   </button>
-                  <button mat-menu-item (click)="rejectPo(row)">
-                    <mat-icon>cancel</mat-icon> Reject
+                  <button mat-menu-item (click)="submitPo(row)">
+                    <mat-icon class="text-primary">send</mat-icon> Submit for Review
                   </button>
-                } @else {
                   <button mat-menu-item (click)="cancelPo(row)">
-                    <mat-icon>block</mat-icon> Cancel
+                    <mat-icon class="text-danger">block</mat-icon> Cancel Order
                   </button>
                 }
+
+                @if (row.status === 'Submitted') {
+                  @if (row.canApprove) {
+                    <button mat-menu-item (click)="approvePo(row)">
+                      <mat-icon class="text-success">check_circle</mat-icon> Approve
+                    </button>
+                    <button mat-menu-item (click)="rejectPo(row)">
+                      <mat-icon class="text-danger">cancel</mat-icon> Reject
+                    </button>
+                  } @else {
+                    <button mat-menu-item (click)="cancelPo(row)">
+                      <mat-icon class="text-danger">block</mat-icon> Cancel
+                    </button>
+                  }
+                }
+              </mat-menu>
+            } @else {
+              <span class="text-muted pe-3">—</span>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="clickable-row" (click)="goToItems(row)"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+            <div class="wims-empty-state">
+              <div class="empty-icon-wrap">
+                <mat-icon>receipt</mat-icon>
+              </div>
+              <h3 class="empty-title">No purchase orders found</h3>
+              <p class="empty-description">Create your first purchase order or clear your search criteria.</p>
+              @if (statusFilter() || search.value) {
+                <button mat-stroked-button (click)="clearFilters()">Clear Filters</button>
               }
-            </mat-menu>
-          } @else {
-            <span class="no-actions">---</span>
-          }
-        </td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="clickable-row" (click)="goToItems(row)"></tr>
-
-      <tr class="mat-row" *matNoDataRow>
-        <td class="mat-cell text-center no-data" [attr.colspan]="displayedColumns.length">
-          No purchase orders found.
-        </td>
-      </tr>
-    </table>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
 
     <mat-paginator
       [length]="totalCount()"
@@ -138,6 +172,8 @@
       [pageIndex]="pageIndex()"
       [pageSizeOptions]="[5, 10, 25, 50]"
       (page)="onPage($event)"
+      showFirstLastButtons
     />
   </div>
+
 </div>

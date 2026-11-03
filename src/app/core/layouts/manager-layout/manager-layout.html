@@ -1,10 +1,20 @@
-<div class="app-shell">
-  <app-sidebar [navItems]="navItems" [collapsed]="sidebarCollapsed()" roleLabel="WAREHOUSE MANAGER"
-    roleDesc="Warehouse operations access" />
+<div class="app-shell" [class.mobile-open]="mobileOpen()">
+  <!-- Mobile drawer backdrop -->
+  <div class="sidebar-backdrop" (click)="closeMobile()"></div>
+
+  <!-- Responsive Navigation Sidebar -->
+  <app-sidebar
+    [navItems]="navItems"
+    [collapsed]="sidebarCollapsed()"
+    (closeMobile)="closeMobile()"
+  />
+
   <div class="shell-body">
     <app-header [sidebarCollapsed]="sidebarCollapsed()" (toggleSidebar)="toggleSidebar()" />
     <main class="shell-content">
-      <router-outlet />
+      <div class="shell-content-inner">
+        <router-outlet />
+      </div>
     </main>
   </div>
 </div>

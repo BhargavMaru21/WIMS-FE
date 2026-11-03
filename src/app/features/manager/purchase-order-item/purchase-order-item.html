@@ -1,7 +1,10 @@
 @if (notFound()) {
   <div class="d-flex flex-column align-items-center justify-content-center gap-2 text-center pt-5">
-    <h2 class="not-found-title">Purchase Order Not Found</h2>
-    <p class="not-found-text">
+    <div class="empty-icon-wrap mb-2">
+      <mat-icon class="fs-1 text-muted">search_off</mat-icon>
+    </div>
+    <h2 class="not-found-title fs-4 fw-bold text-dark">Purchase Order Not Found</h2>
+    <p class="not-found-text text-muted max-w-sm">
       The purchase order you're looking for doesn't exist, or you don't have access to it.
     </p>
     <button mat-flat-button color="primary" (click)="goBack()">
@@ -9,31 +12,45 @@
     </button>
   </div>
 } @else if (loading() && !po()) {
-  <div class="page-loading">
-    <mat-spinner diameter="40" />
+  <div class="page-loading d-flex flex-column align-items-center justify-content-center py-5">
+    <mat-spinner diameter="44" />
+    <span class="text-muted mt-3">Loading order details...</span>
   </div>
 } @else {
 
   <div class="d-flex flex-column gap-4">
 
-    <div class="d-flex align-items-center gap-2 flex-wrap">
-      <button mat-icon-button (click)="goBack()" matTooltip="Back to purchase orders">
-        <mat-icon>arrow_back</mat-icon>
-      </button>
-      <h1 class="fs-4 m-0 fw-semibold">
-        {{ po()?.poNumber ?? 'Purchase Order' }} — Items
-      </h1>
-      @if (po(); as p) {
-        <span class="status-chip" [ngClass]="statusClass(p.status)">{{ p.status }}</span>
+    <!-- Header & Navigation -->
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <button mat-icon-button (click)="goBack()" matTooltip="Back to purchase orders" aria-label="Go back">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div>
+          <div class="d-flex align-items-center gap-2">
+            <h1 class="page-title">{{ po()?.poNumber ?? 'Purchase Order' }}</h1>
+            @if (po(); as p) {
+              <span class="status-chip" [ngClass]="statusClass(p.status)">{{ p.status }}</span>
+            }
+          </div>
+          <p class="page-subtitle">Line item manifest and fulfillment tracking.</p>
+        </div>
+      </div>
+
+      @if (canManageItems) {
+        <button mat-flat-button color="primary" (click)="openAddItemDialog()" class="shadow-sm">
+          <mat-icon>add</mat-icon> Add Line Item
+        </button>
       }
     </div>
 
+    <!-- PO Summary Card -->
     @if (po(); as p) {
       <div class="po-summary-card" [class.has-order-date]="!!p.orderDate">
 
         <div class="summary-item">
           <span class="summary-label">Supplier Name</span>
-          <span class="summary-value">{{ p.supplierName }}</span>
+          <span class="summary-value fw-semibold">{{ p.supplierName }}</span>
         </div>
 
         <div class="summary-item">
@@ -50,7 +67,7 @@
 
         <div class="summary-item">
           <span class="summary-label">Total Amount</span>
-          <span class="summary-value price">₹{{ p.totalAmount | number:'1.2-2' }}</span>
+          <span class="summary-value price text-primary fw-bold fs-5">₹{{ p.totalAmount | number:'1.2-2' }}</span>
         </div>
 
         @if (p.orderDate) {
@@ -66,9 +83,9 @@
         </div>
 
         <div class="summary-item note-item">
-          <span class="summary-label">Note</span>
+          <span class="summary-label">Notes</span>
           <span class="summary-value">
-            <span [class.no-value]="!p.notes">{{ p.notes ?? 'No Note' }}</span>
+            <span [class.no-value]="!p.notes">{{ p.notes ?? 'No notes provided' }}</span>
           </span>
         </div>
 
@@ -95,7 +112,7 @@
             </div>
             <div class="summary-item note-item">
               <span class="summary-label">Rejection Reason</span>
-              <span class="summary-value">{{ p.rejectionReason }}</span>
+              <span class="summary-value text-danger">{{ p.rejectionReason }}</span>
             </div>
           } @else if (p.status === 'Cancelled') {
             <div class="summary-item">
@@ -117,97 +134,127 @@
             </div>
           }
         }
+
       </div>
     }
 
-    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-      <div class="d-flex align-items-center gap-2">
-        <app-input class="search-field" label="Search items" placeholder="Search by product name..."
-          subscriptSizing="dynamic" icon="search" [maxlength]="101" [customErrorMessage]="searchError()"
-          [formControl]="search" />
-
-        @if (search.value) {
-          <button mat-stroked-button (click)="clearFilters()">
-            <mat-icon>clear</mat-icon> Clear
-          </button>
-        }
-      </div>
-
-      @if (canManageItems) {
-        <button mat-flat-button color="primary" (click)="openAddItemDialog()">
-          <mat-icon>add</mat-icon> Add Item
-        </button>
-      }
-    </div>
-
-    <div class="position-relative border-2 overflow-auto">
+    <!-- Items Filter & Table -->
+    <div class="wims-table-container">
       @if (loading()) {
         <div class="loading-overlay">
           <mat-spinner diameter="40" />
+          <span>Loading line items...</span>
         </div>
       }
 
-      <div>
-        <h5>List Of Items</h5>
+      <div class="wims-card-header">
+        <h3 class="wims-card-title">
+          <mat-icon class="text-primary fs-5">format_list_bulleted</mat-icon>
+          <span>Line Items ({{ dataSource.data.length }})</span>
+        </h3>
+
+        <div class="d-flex align-items-center gap-2">
+          <app-input
+            class="search-field"
+            label="Search items"
+            placeholder="Search by product..."
+            subscriptSizing="fixed"
+            icon="search"
+            [formControl]="search"
+          />
+          @if (search.value) {
+            <button mat-stroked-button (click)="clearFilters()">Clear</button>
+          }
+        </div>
       </div>
 
-      <table mat-table [dataSource]="dataSource" matSort (matSortChange)="onSort($event)" class="w-100">
+      <div class="overflow-x-auto">
+        <table mat-table [dataSource]="dataSource" matSort (matSortChange)="onSort($event)" class="w-100">
 
-        <ng-container matColumnDef="productName">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Product</th>
-          <td mat-cell *matCellDef="let row">{{ row.productName }}</td>
-        </ng-container>
+          <!-- Product Name -->
+          <ng-container matColumnDef="productName">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Product</th>
+            <td mat-cell *matCellDef="let row">
+              <div class="d-flex align-items-center gap-2">
+                <mat-icon class="text-secondary fs-5">inventory_2</mat-icon>
+                <span class="fw-semibold text-dark">{{ row.productName }}</span>
+              </div>
+            </td>
+          </ng-container>
 
-        <ng-container matColumnDef="orderedQty">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Ordered Qty</th>
-          <td mat-cell *matCellDef="let row">{{ row.orderedQty }} {{ row.uomAbbreviation }}</td>
-        </ng-container>
+          <!-- Ordered Qty -->
+          <ng-container matColumnDef="orderedQty">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Ordered Qty</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="fw-semibold">{{ row.orderedQty }}</span>
+              <span class="text-muted ms-1">{{ row.uomAbbreviation }}</span>
+            </td>
+          </ng-container>
 
-        <ng-container matColumnDef="unitPrice">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Unit Price</th>
-          <td mat-cell *matCellDef="let row">₹{{ row.unitPrice | number:'1.2-2' }}</td>
-        </ng-container>
+          <!-- Unit Price -->
+          <ng-container matColumnDef="unitPrice">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Unit Price</th>
+            <td mat-cell *matCellDef="let row">₹{{ row.unitPrice | number:'1.2-2' }}</td>
+          </ng-container>
 
-        <ng-container matColumnDef="lineTotal">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Line Total</th>
-          <td mat-cell *matCellDef="let row">₹{{ row.lineTotal | number:'1.2-2' }}</td>
-        </ng-container>
+          <!-- Line Total -->
+          <ng-container matColumnDef="lineTotal">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Line Total</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="fw-bold text-dark">₹{{ row.lineTotal | number:'1.2-2' }}</span>
+            </td>
+          </ng-container>
 
-        <ng-container matColumnDef="receivedQty">
-          <th mat-header-cell *matHeaderCellDef>Received</th>
-          <td mat-cell *matCellDef="let row">{{ row.receivedQty }} / {{ row.orderedQty }} {{ row.uomAbbreviation }}</td>
-        </ng-container>
+          <!-- Received Qty -->
+          <ng-container matColumnDef="receivedQty">
+            <th mat-header-cell *matHeaderCellDef>Received</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="badge bg-light text-dark border">
+                {{ row.receivedQty }} / {{ row.orderedQty }} {{ row.uomAbbreviation }}
+              </span>
+            </td>
+          </ng-container>
 
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Actions</th>
-          <td mat-cell *matCellDef="let row">
-            @if (canManageItems) {
-              <button mat-icon-button [matMenuTriggerFor]="menu">
-                <mat-icon>more_vert</mat-icon>
-              </button>
-              <mat-menu #menu="matMenu">
-                <button mat-menu-item (click)="openEditItemDialog(row)">
-                  <mat-icon>edit</mat-icon> Edit Quantity
+          <!-- Actions -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="text-end">Actions</th>
+            <td mat-cell *matCellDef="let row" class="text-end">
+              @if (canManageItems) {
+                <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Item actions">
+                  <mat-icon>more_vert</mat-icon>
                 </button>
-                <button mat-menu-item (click)="removeItem(row)">
-                  <mat-icon>delete</mat-icon> Remove
-                </button>
-              </mat-menu>
-            } @else {
-              <span class="text-muted">—</span>
-            }
-          </td>
-        </ng-container>
+                <mat-menu #menu="matMenu">
+                  <button mat-menu-item (click)="openEditItemDialog(row)">
+                    <mat-icon>edit</mat-icon> Edit Quantity
+                  </button>
+                  <button mat-menu-item (click)="removeItem(row)">
+                    <mat-icon class="text-danger">delete</mat-icon>
+                    <span class="text-danger">Remove</span>
+                  </button>
+                </mat-menu>
+              } @else {
+                <span class="text-muted pe-3">—</span>
+              }
+            </td>
+          </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 
-        <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell text-center no-data" [attr.colspan]="displayedColumns.length">
-            No items added to this purchase order yet.
-          </td>
-        </tr>
-      </table>
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+              <div class="wims-empty-state">
+                <div class="empty-icon-wrap">
+                  <mat-icon>format_list_bulleted</mat-icon>
+                </div>
+                <h3 class="empty-title">No items added yet</h3>
+                <p class="empty-description">Add line items to this purchase order using the button above.</p>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
     </div>
+
   </div>
 }
