@@ -11,7 +11,7 @@ export const routes: Routes = [
 
   {
     path: 'success',
-    component: Success
+    component: Success,
   },
 
   {
@@ -41,12 +41,11 @@ export const routes: Routes = [
         path: '',
         redirectTo: 'login',
         pathMatch: 'full',
-      }
+      },
     ],
   },
 
-
-  //Admin
+  // Admin
   {
     path: 'admin',
     canActivate: [authGuard, roleGuard('Administrator')],
@@ -55,6 +54,13 @@ export const routes: Routes = [
         (m) => m.AdminLayoutComponent,
       ),
     children: [
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./features/dashboard/admin-dashboard/admin-dashboard.js').then(
+            (m) => m.AdminDashboardComponent,
+          ),
+      },
       {
         path: 'users',
         loadComponent: () =>
@@ -118,15 +124,13 @@ export const routes: Routes = [
       },
       {
         path: '',
-        redirectTo: 'users',
+        redirectTo: 'dashboard',
         pathMatch: 'full',
-      }
+      },
     ],
   },
 
-
-
-  //  Manager
+  // Manager
   {
     path: 'manager',
     canActivate: [authGuard, roleGuard('WarehouseManager')],
@@ -136,11 +140,18 @@ export const routes: Routes = [
       ),
     children: [
       {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./features/dashboard/manager-dashboard/manager-dashboard.js').then(
+            (m) => m.ManagerDashboardComponent,
+          ),
+      },
+      {
         path: 'purchase-order',
         loadComponent: () =>
           import('./features/manager/purchase-order/purchase-order.js').then(
-            (m) => m.PurchaseOrder
-          )
+            (m) => m.PurchaseOrder,
+          ),
       },
       {
         path: 'purchase-order/:id/items',
@@ -156,14 +167,13 @@ export const routes: Routes = [
       },
       {
         path: '',
-        redirectTo: 'purchase-order',
+        redirectTo: 'dashboard',
         pathMatch: 'full',
-      }
+      },
     ],
   },
 
-
-  // Stock Keeper 
+  // Stock Keeper
   {
     path: 'stock-keeper',
     canActivate: [authGuard, roleGuard('StockKeeper')],
@@ -173,11 +183,18 @@ export const routes: Routes = [
       ),
     children: [
       {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./features/dashboard/stock-keeper-dashboard/stock-keeper-dashboard.js').then(
+            (m) => m.StockKeeperDashboardComponent,
+          ),
+      },
+      {
         path: 'goods-receipt',
         loadComponent: () =>
           import('./features/stock-keeper/goods-receipt/goods-receipt.js').then(
-            (m) => m.GoodsReceipt
-          )
+            (m) => m.GoodsReceipt,
+          ),
       },
       {
         path: 'profile',
@@ -186,9 +203,9 @@ export const routes: Routes = [
       },
       {
         path: '',
-        redirectTo: 'goods-receipt',
+        redirectTo: 'dashboard',
         pathMatch: 'full',
-      }
+      },
     ],
   },
 

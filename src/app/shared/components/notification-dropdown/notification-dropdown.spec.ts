@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { NotificationDropdown } from './notification-dropdown';
+import { NotificationDropdownComponent } from './notification-dropdown';
 
-describe('NotificationDropdown', () => {
-  let component: NotificationDropdown;
-  let fixture: ComponentFixture<NotificationDropdown>;
+describe('NotificationDropdownComponent', () => {
+  let component: NotificationDropdownComponent;
+  let fixture: ComponentFixture<NotificationDropdownComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NotificationDropdown]
+      imports: [NotificationDropdownComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(NotificationDropdown);
+    fixture = TestBed.createComponent(NotificationDropdownComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

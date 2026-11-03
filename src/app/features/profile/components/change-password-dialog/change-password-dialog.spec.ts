@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ChangePasswordDialog } from './change-password-dialog';
+import { ChangePasswordDialogComponent } from './change-password-dialog';
 
-describe('ChangePasswordDialog', () => {
-  let component: ChangePasswordDialog;
-  let fixture: ComponentFixture<ChangePasswordDialog>;
+describe('ChangePasswordDialogComponent', () => {
+  let component: ChangePasswordDialogComponent;
+  let fixture: ComponentFixture<ChangePasswordDialogComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ChangePasswordDialog]
+      imports: [ChangePasswordDialogComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ChangePasswordDialog);
+    fixture = TestBed.createComponent(ChangePasswordDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
