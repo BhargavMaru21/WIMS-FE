@@ -1,1 +1,187 @@
-<p>goods-receipt works!</p>
+<div class="d-flex flex-column gap-3">
+
+  <!-- Header -->
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+    <div>
+      <h1 class="page-title">Goods Receipt & Put-Away</h1>
+      <p class="page-subtitle">Inspect inbound deliveries, verify package manifests, and route items to assigned storage bins.</p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <a routerLink="/stock-keeper/dashboard" class="btn btn-outline-secondary d-flex align-items-center gap-1">
+        <mat-icon class="fs-6">dashboard</mat-icon> Dashboard
+      </a>
+    </div>
+  </div>
+
+  <!-- Operational Metrics Strip -->
+  <div class="row g-3">
+    <div class="col-12 col-sm-4">
+      <div class="metric-card p-3 rounded-3 border bg-white shadow-sm d-flex align-items-center gap-3">
+        <div class="metric-icon-wrap bg-warning-subtle text-warning">
+          <mat-icon>local_shipping</mat-icon>
+        </div>
+        <div>
+          <span class="text-muted small fw-semibold text-uppercase">Awaiting Check-in</span>
+          <h4 class="fs-4 fw-bold text-dark m-0">2 Shipments</h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-sm-4">
+      <div class="metric-card p-3 rounded-3 border bg-white shadow-sm d-flex align-items-center gap-3">
+        <div class="metric-icon-wrap bg-primary-subtle text-primary">
+          <mat-icon>fact_check</mat-icon>
+        </div>
+        <div>
+          <span class="text-muted small fw-semibold text-uppercase">Under Inspection</span>
+          <h4 class="fs-4 fw-bold text-dark m-0">1 Order</h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-sm-4">
+      <div class="metric-card p-3 rounded-3 border bg-white shadow-sm d-flex align-items-center gap-3">
+        <div class="metric-icon-wrap bg-success-subtle text-success">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+        <div>
+          <span class="text-muted small fw-semibold text-uppercase">Processed Today</span>
+          <h4 class="fs-4 fw-bold text-dark m-0">2 Orders</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Toolbar -->
+  <div class="filter-toolbar">
+    <div class="search-input-wrap flex-grow-1">
+      <div class="input-group">
+        <span class="input-group-text bg-white border-end-0">
+          <mat-icon class="text-muted fs-5">search</mat-icon>
+        </span>
+        <input
+          type="text"
+          class="form-control border-start-0"
+          placeholder="Search by PO number, supplier, or dock bay..."
+          [(ngModel)]="searchQuery"
+        />
+      </div>
+    </div>
+
+    <div class="status-tabs d-flex align-items-center gap-1">
+      @for (st of ['All', 'Pending', 'Inspecting', 'Stored', 'Put Away']; track st) {
+        <button
+          type="button"
+          class="btn btn-sm"
+          [class.btn-primary]="statusFilter() === st"
+          [class.btn-outline-secondary]="statusFilter() !== st"
+          (click)="statusFilter.set(st)"
+        >
+          {{ st }}
+        </button>
+      }
+    </div>
+
+    @if (searchQuery() || statusFilter() !== 'All') {
+      <button mat-stroked-button (click)="clearFilters()">
+        <mat-icon>clear</mat-icon> Clear
+      </button>
+    }
+  </div>
+
+  <!-- Table Container -->
+  <div class="wims-table-container">
+    <div class="overflow-x-auto">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-3 text-uppercase text-muted small fw-bold">PO Number</th>
+            <th class="text-uppercase text-muted small fw-bold">Supplier</th>
+            <th class="text-uppercase text-muted small fw-bold">Dock Bay</th>
+            <th class="text-uppercase text-muted small fw-bold">Units</th>
+            <th class="text-uppercase text-muted small fw-bold">Assigned Storage Bin</th>
+            <th class="text-uppercase text-muted small fw-bold">Status</th>
+            <th class="pe-3 text-end text-uppercase text-muted small fw-bold">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of filteredShipments; track row.id) {
+            <tr>
+              <td class="ps-3">
+                <span class="wims-code-pill text-primary fw-bold">{{ row.poNumber }}</span>
+              </td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <mat-icon class="text-secondary fs-5">business</mat-icon>
+                  <span class="fw-semibold text-dark">{{ row.supplierName }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="badge bg-light text-dark border">{{ row.dockBay }}</span>
+              </td>
+              <td>
+                <span class="fw-semibold text-dark">{{ row.itemCount }} units</span>
+              </td>
+              <td>
+                @if (row.assignedBin) {
+                  <span class="wims-code-pill bg-info-subtle border-info-subtle text-info-emphasis">
+                    {{ row.assignedBin }}
+                  </span>
+                } @else {
+                  <span class="text-muted italic">Unassigned</span>
+                }
+              </td>
+              <td>
+                <span
+                  class="wims-badge"
+                  [class.wims-badge-warning]="row.status === 'Pending'"
+                  [class.wims-badge-info]="row.status === 'Inspecting'"
+                  [class.wims-badge-primary]="row.status === 'Stored'"
+                  [class.wims-badge-success]="row.status === 'Put Away'"
+                >
+                  <span class="badge-dot"></span>
+                  {{ row.status }}
+                </span>
+              </td>
+              <td class="pe-3 text-end">
+                @if (row.status === 'Pending') {
+                  <button mat-flat-button color="primary" (click)="setStatus(row, 'Inspecting')">
+                    Start Inspection
+                  </button>
+                } @else if (row.status === 'Inspecting') {
+                  <button mat-flat-button color="accent" (click)="setStatus(row, 'Stored')">
+                    Approve & Store
+                  </button>
+                } @else if (row.status === 'Stored') {
+                  <button mat-stroked-button (click)="setStatus(row, 'Put Away')">
+                    Confirm Put Away
+                  </button>
+                } @else {
+                  <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                    <mat-icon class="align-middle fs-6">check</mat-icon> Completed
+                  </span>
+                }
+              </td>
+            </tr>
+          }
+
+          @if (filteredShipments.length === 0) {
+            <tr>
+              <td colspan="7">
+                <div class="wims-empty-state">
+                  <div class="empty-icon-wrap">
+                    <mat-icon>move_to_inbox</mat-icon>
+                  </div>
+                  <h3 class="empty-title">No matching shipments</h3>
+                  <p class="empty-description">There are no inbound shipments matching the active filters.</p>
+                  @if (searchQuery() || statusFilter() !== 'All') {
+                    <button mat-stroked-button (click)="clearFilters()">Clear Filters</button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

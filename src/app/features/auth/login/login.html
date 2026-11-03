@@ -1,31 +1,81 @@
 <div class="login-page">
 
+  <!-- Left Hero Panel (Large screens) -->
   <div class="login-left d-none d-lg-flex flex-column justify-content-between p-5">
 
+    <!-- Top Brand -->
     <div class="d-flex align-items-center gap-2">
       <div class="brand-icon d-flex align-items-center justify-content-center">
         <i class="bi bi-box-seam-fill"></i>
       </div>
       <span class="brand-name">WIMS</span>
+      <span class="brand-badge ms-2">ENTERPRISE</span>
     </div>
 
-    <div>
-      <p class="left-eyebrow mb-3">Warehouse & Inventory</p>
+    <!-- Center Pitch & Features -->
+    <div class="hero-content my-auto">
+      <p class="left-eyebrow mb-2">Next-Gen Warehouse OS</p>
       <h1 class="left-heading mb-3">
-        Everything in<br>its right place.
+        Intelligent inventory control & warehouse operations.
       </h1>
-      <p class="left-sub mb-0">
-        Manage stock, track shipments, and control<br>
-        your warehouses — all from one place.
+      <p class="left-sub mb-4">
+        Track stock across multi-tier facilities, streamline purchase approvals, and eliminate dispatch delays with real-time analytics.
       </p>
+
+      <!-- Key Value Badges -->
+      <div class="features-list d-flex flex-column gap-3">
+        <div class="feature-item d-flex align-items-center gap-3">
+          <div class="feature-icon d-flex align-items-center justify-content-center">
+            <i class="bi bi-check-lg"></i>
+          </div>
+          <span>Multi-facility storage bin & zone allocation</span>
+        </div>
+        <div class="feature-item d-flex align-items-center gap-3">
+          <div class="feature-icon d-flex align-items-center justify-content-center">
+            <i class="bi bi-check-lg"></i>
+          </div>
+          <span>End-to-end purchase order and inbound goods verification</span>
+        </div>
+        <div class="feature-item d-flex align-items-center gap-3">
+          <div class="feature-icon d-flex align-items-center justify-content-center">
+            <i class="bi bi-check-lg"></i>
+          </div>
+          <span>Automated reorder triggers & safety stock alerts</span>
+        </div>
+      </div>
     </div>
 
-    <p class="left-footer mb-0"></p>
+    <!-- Bottom Metrics -->
+    <div class="left-footer pt-4 border-top border-white border-opacity-10 d-flex align-items-center justify-content-between">
+      <div>
+        <span class="d-block fs-5 fw-bold">99.9%</span>
+        <span class="footer-label">Inventory Accuracy</span>
+      </div>
+      <div class="footer-divider"></div>
+      <div>
+        <span class="d-block fs-5 fw-bold">Zero Latency</span>
+        <span class="footer-label">Real-time Sync</span>
+      </div>
+      <div class="footer-divider"></div>
+      <div>
+        <span class="d-block fs-5 fw-bold">Role-Based</span>
+        <span class="footer-label">RBAC Security</span>
+      </div>
+    </div>
 
   </div>
 
-  <div class="login-right d-flex align-items-center justify-content-center p-4">
+  <!-- Right Form Panel -->
+  <div class="login-right d-flex align-items-center justify-content-center p-3 p-sm-4 p-md-5">
     <div class="form-card w-100">
+
+      <!-- Mobile Brand Header -->
+      <div class="d-flex d-lg-none align-items-center gap-2 mb-4 justify-content-center">
+        <div class="brand-icon mobile-brand d-flex align-items-center justify-content-center">
+          <i class="bi bi-box-seam-fill"></i>
+        </div>
+        <span class="brand-name text-dark">WIMS</span>
+      </div>
 
       <div class="mb-4">
         <h2 class="form-title mb-1">Sign in to your account</h2>
@@ -38,7 +88,7 @@
           <app-input
             label="Email address"
             type="email"
-            subscriptSizing = "dynamic"
+            subscriptSizing="dynamic"
             placeholder="you@company.com"
             prefixIcon="mail_outline"
             [maxlength]="200"
@@ -53,7 +103,7 @@
             label="Password"
             type="password"
             placeholder="Enter your password"
-            subscriptSizing = "dynamic"
+            subscriptSizing="dynamic"
             [maxlength]="100"
             prefixIcon="lock_outline"
             autocomplete="current-password"
@@ -75,9 +125,15 @@
           @if (loading()) {
             <mat-spinner diameter="20" />
           } @else {
-            Sign In
+            <span>Sign In to WIMS</span>
+            <i class="bi bi-arrow-right ms-2"></i>
           }
         </button>
+
+        <div class="security-badge mt-4 d-flex align-items-center justify-content-center gap-2 text-muted">
+          <i class="bi bi-shield-check text-success"></i>
+          <span>Enterprise 256-bit TLS encrypted session</span>
+        </div>
 
       </form>
     </div>

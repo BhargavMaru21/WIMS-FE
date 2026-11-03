@@ -1,2 +1,31 @@
-<h1>Login SuccessFull</h1>
-<button (click)="logout()">Logout</button>
+<div class="wims-auth-page d-flex align-items-center justify-content-center p-3 p-sm-4">
+  <div class="success-card-wrap w-100 text-center">
+
+    <div class="auth-card p-4 p-sm-5">
+      <div class="success-icon-wrap mx-auto mb-3 d-flex align-items-center justify-content-center">
+        <i class="bi bi-shield-check fs-1"></i>
+      </div>
+
+      <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 mb-2">Authenticated</span>
+      <h1 class="fw-bold fs-3 text-dark mb-1">Welcome to WIMS</h1>
+      <p class="text-muted small mb-4">
+        You are signed in as <strong class="text-dark">{{ user?.name || 'Authorized User' }}</strong>
+        @if (user?.role) {
+          <span>({{ user?.role }})</span>
+        }
+      </p>
+
+      <div class="d-flex flex-column gap-2">
+        <a [routerLink]="dashboardRoute" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2 go-btn">
+          <span>Go to Operations Dashboard</span>
+          <i class="bi bi-arrow-right"></i>
+        </a>
+
+        <button type="button" class="btn btn-outline-secondary w-100" (click)="logout()">
+          Sign Out
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
