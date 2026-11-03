@@ -7,10 +7,7 @@
         <mat-icon>inventory_2</mat-icon>
       </div>
       @if (!collapsed()) {
-        <div class="d-flex flex-column overflow-hidden text-truncate">
-          <span class="sidebar-brand-name">Warehouse OS</span>
-          <span class="sidebar-brand-env">PROD v2.4</span>
-        </div>
+        <span class="sidebar-brand-name ms-1 text-truncate">Warehouse OS</span>
       }
     </div>
 
@@ -25,7 +22,7 @@
 
   <!-- Navigation Links -->
   <nav class="sidebar-nav d-flex flex-column gap-1 p-2 flex-grow-1 overflow-y-auto">
-    @if (!collapsed() && roleLabel()) {
+    @if (!collapsed()) {
       <div class="nav-section-label px-2 pt-2 pb-1">
         <span>MENU</span>
       </div>
@@ -47,15 +44,5 @@
       </a>
     }
   </nav>
-
-  <!-- Sidebar Footer: Role Info -->
-  @if (!collapsed() && roleLabel()) {
-    <div class="sidebar-footer p-3 border-top mt-auto bg-light">
-      <div class="role-card d-flex flex-column">
-        <span class="role-badge">{{ roleLabel() }}</span>
-        <span class="role-desc mt-1">{{ roleDesc() }}</span>
-      </div>
-    </div>
-  }
 
 </aside>

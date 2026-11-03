@@ -20,8 +20,6 @@ export interface NavItem {
 export class SidebarComponent {
   readonly navItems = input<NavItem[]>([]);
   readonly collapsed = input<boolean>(false);
-  readonly roleLabel = input<string>('');
-  readonly roleDesc = input<string>('');
   readonly closeMobile = output<void>();
 
   onNavClick(): void {
