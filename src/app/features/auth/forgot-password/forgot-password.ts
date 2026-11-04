@@ -30,14 +30,22 @@ export class ForgotPasswordComponent {
   readonly loading = signal(false);
   readonly submitted = signal(false);
   readonly submittedEmail = signal('');
+  // NOTE: Set to false to restore forgot-password once SMTP credentials are fixed
+  readonly isServiceUnavailable = signal(true);
 
   readonly form = this.fb.group({
-    email: ['', [Validators.required, emailValidator()]],
+    // NOTE: Change back to: email: ['', [Validators.required, emailValidator()]], once email service is restored
+    email: [{ value: '', disabled: true }, [Validators.required, emailValidator()]],
   });
 
   get emailError(): string { return getEmailError(this.form.get('email')); }
 
   onSubmit(): void {
+    if (this.isServiceUnavailable()) {
+      this.toast.error('Password reset is currently unavailable due to an email service issue. Please contact your administrator.');
+      return;
+    }
+
     this.form.markAllAsTouched();
     if (this.form.invalid || this.loading()) return;
 
